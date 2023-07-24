@@ -1,0 +1,37 @@
+{
+   
+    "0":{
+        "role": "seer",
+        "num_vote" : 1,
+        "identity_number" : 0,
+        "identity" : 1
+    },
+    "1":{
+        "role": "witch",
+        "num_vote" : 1,
+        "identity_number" : 1,
+        "identity" : 1,
+        "save_times" : 1,
+        "kill_times" : 1
+    },
+    "2":{
+        "role": "village",
+        "num_vote" : 1,
+        "identity_number" : 2,
+        "identity" : 1
+    },
+    "3":{
+        "role": "werewolf",
+        "num_vote" : 1,
+        "identity_number" : 3,
+        "identity" : 0
+    },
+    "4":{
+        "role": "hunter",
+        "num_vote" : 1,
+        "identity_number" : 4,
+        "identity" : 1,
+        "kill_times" : 1
+    }
+
+}

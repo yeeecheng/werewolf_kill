@@ -1,6 +1,8 @@
 # from role import * 
-import random 
 import collections 
+import random 
+import json
+
 class env():
     
     """
@@ -11,18 +13,17 @@ class env():
     4 : hunter
     """
     
-    def __init__(self):
+    def __init__(self, state = 1, round = 1):
         
         random.seed(10955)
 
         # env's state, night(0) and day(1)
-        self.state = 1
+        self.state = state
         # game current round
-        self.round = 1
-
-        self.num_of_poison = 1
-        self.num_of_save =1
-    
+        self.round = round
+        # role init setting
+        with open("./role_setting.json") as file:
+            self.dict_role_setting = json.load(file)
 
     # start game
     def start_game(self,roles:list):
@@ -40,41 +41,41 @@ class env():
             return 
         
         
-        self.list_players = self.assign_roles()
+        self.list_players = self.__assign_roles__()
         
         # werewolves choose who they want to kill
-        current_round_killed = self.werewolf_kill([0,1])
+        # current_round_killed = self.werewolf_kill([0,1])
         
         # seer 
 
-        self.seer_check_identity(0)
+        # self.seer_check_identity(0)
     
         # witch
         
-        if self.num_of_poison != 0 :
-            self.witch_poison(-1)
+        # if self.num_of_poison != 0 :
+        #     self.witch_poison(-1)
         
-        if self.num_of_save != 0:
-            self.witch_save(-1)
+        # if self.num_of_save != 0:
+        #     self.witch_save(-1)
 
-        # comment round
+        # # comment round
 
-        #　vote 
-        list_candidate = self.vote([0,0,0,1,1,1,2])
-        if len(list_candidate) != 1 :
-            pass
+        # #　vote 
+        # list_candidate = self.vote([0,0,0,1,1,1,2])
+        # if len(list_candidate) != 1 :
+        #     pass
 
 
     # assign game roles to players
-    def assign_roles(self)->list():
+    def __assign_roles__(self)->list():
         
         # list_assigned_roles = random.sample(self.roles , self.num_player)
         list_assigned_roles = [0,1,2,2,3,3] 
-        list_players = [role()]*self.num_player
+        list_players = [0]*self.num_player
         # create roles 
         for idx in range(self.num_player):
-            list_players[idx].setting_identity(list_assigned_roles[idx])
-
+            list_players[idx] = role( self.dict_role_setting[str(list_assigned_roles[idx])])
+        
         return list_players
     
     # choose someone to comment 
@@ -121,33 +122,84 @@ class env():
             return
 
     def hunter_kill(self,number:int):
-        self.list_players[number].state = 0
+        if self.get_state(number) == 1:
+            self.list_players[number].update_state()
 
-    def get_state(self,number):
+    def get_player_state(self,number:int)->int:
         return self.list_players[number].state
     
-    def get_dialogue(self,number):
+    def get_player_dialogue(self,number:int)->list:
         return self.list_players[number].dialogues
+
+
+    """ vote func """
+    
+    # people player want to vote for
+    def player_vote(self,player_number,want_to_vote_player_number):
+        self.list_players[player_number].vote(want_to_vote_player_number)
+
+    def __setting_voted_player__(self)->list:
+        list_current_vote = [-1]*self.num_player
+        for idx , each_player  in enumerate(self.list_players):
+            list_current_vote[idx] = each_player.current_vote_player_number 
+        return list_current_vote
+    # get number of voted player 
+    def get_num_of_voted_player(self)->int:
+        list_current_vote = self.__setting_voted_player__()
+        return self.num_player - list_current_vote.count(-1)
+    
+    def __check_vote_state__(self,list_current_vote)->bool:
+
+        # all player vote 
+        if  list_current_vote.count(-1) == 0:
+            return True
+        # Some players haven't vote yet
+        return False
+    
+    def round_vote(self)->tuple[bool,list]:
         
+        list_current_vote = self.__setting_voted_player__()
+        if not self.__check_vote_state__(list_current_vote):
+            return False, None
+        
+        dict_vote = collections.Counter(list_current_vote)
+        list_candidate = [key for key , value in dict_vote.items() if value == max(dict_vote.values())]
+        
+        if len(list_candidate) != 1:
+            return False, list_candidate
+        
+        return True, list_candidate
+
+
+
 class role():
 
-    def __init__(self):
+    def __init__(self,init_data:dict):
         
-        # number of vote each person 
-        self.num_vote = 1
-        # live(1) or dead(0) 
-        self.state = 1
+        for key , value in init_data.items():
+            setattr(self ,key , value)
         # dialogues
         self.dialogues = list()
-
-    def setting_identity(self,identity_number):
+        #　live(1) or dead(0) 
+        self.state =  1
+        """
+        basement init 
         
-        # identity, good(1) or bad(0)
-        self.identity = 1
-        if identity_number == 3:
-            self.identity = 0
+        num_vote : number of vote each person  
+        identity_number : 角色身分
+        identity : 身分好壞
+        save_times : 救人次數
+        kill_times : 殺人次數
+        """ 
 
-   
+    def __update_state__(self):
+        self.state = not self.state
+
+    def __update_num_vote__(self,num_vote:int):
+        self.num_vote = num_vote
+
+    def __vote__(self,player_number:int):
+        self.current_vote_player_number = player_number
 
 
 """
@@ -169,6 +221,6 @@ if __name__ == "__main__":
 
     env = env()
     env.start_game(roles=[0,1,2,2,3,3])
-    env.werewolf_kill([0,1,1,0])
+    # env.werewolf_kill([0,1,1,0])
     
     
