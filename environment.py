@@ -54,9 +54,12 @@ class env():
         
         self.list_players = self.__assign_roles__()
         
-
-    # assign game roles to players
     def __assign_roles__(self)->list():
+        """
+        assign game roles to players \n
+        return value : \n
+            list -> 分配後的角色
+        """
         
         # list_assigned_roles = random.sample(self.roles , self.num_player)
         list_assigned_roles = [0,1,2,2,3,3] 
@@ -77,7 +80,7 @@ class env():
     
     def choose_comment(self)->int:
         """
-        choose someone to comment
+        choose someone to comment \n
         return value : \n
             The player number which be chosen.
         """
@@ -105,7 +108,7 @@ class env():
         player_number -> who want to get identity \n
         target_player_number -> target \n
         return value : \n
-            True -> success saving
+            True -> success saving \n
             False -> failed saving
         """
 
@@ -122,7 +125,7 @@ class env():
         player_number -> who want to get identity \n
         target_player_number -> target \n
         return value : \n
-            True -> success poisoning
+            True -> success poisoning  \n
             False -> failed poisoning
         """
 
@@ -139,9 +142,8 @@ class env():
         player_number -> who want to get identity \n
         target_player_number -> target \n
         return value : \n
-            True -> success killing
+            True -> success killing \n
             False -> failed killing
-        
         """
         # you aren't hunter or kill_times ran out or the target player is died
         if self.list_players[player_number].role != "hunter" or self.list_players[player_number].kill_times <= 0 or not self.list_players[target_player_number].state:
@@ -150,15 +152,28 @@ class env():
         self.list_players[player_number].kill_times -= 1
         return True
 
-    def get_player_state(self,number:int)->int:
-        return self.list_players[number].state
+    def get_player_state(self,player_number:int)->int:
+        """
+        get the state of player number \n 
+        player_number -> player number \n
+        return value : \n
+            int -> state 
+        """
+
+        return self.list_players[player_number].state
     
     def get_player_dialogue(self,number:int)->list:
         return self.list_players[number].dialogues
     """ werewolf func"""
     
     def __check_werewolf_vote_state__(self,list_current_vote)->bool:
-
+        """
+        check the vote condition \n
+        list_current_vote -> list of vote state [-1,-1,2,4,5,6] \n
+        return value : \n
+            bool -> True(all vote), False(not yet) 
+        """
+        
         # all werewolf vote 
         if  list_current_vote.count(-1) == (self.num_god+self.num_village):
             return True
@@ -171,10 +186,9 @@ class env():
         return value: \n
             bool -> 是否決定出一個玩家 \n
             list -> 決定出的玩家是誰
-        
         """
 
-        list_current_vote = self.__setting_voted_player__()
+        list_current_vote = self.__update_current_voted_player__()
         list_candidate = self.__find_maximum_voted_candidate__(list_current_vote)
         
         # multiple candidate or not all werewolf vote
@@ -186,13 +200,26 @@ class env():
         return True, list_candidate
     
     def __find_maximum_voted_candidate__(self,list_current_vote:list)->list:
+        """
+        找出最高票數的人 \n
+        list_current_vote -> 現在投票狀態 \n
+        return value : \n
+            list -> 最高票數的list
+        """
 
         dict_vote = collections.Counter(list_current_vote)
         list_candidate = [key for key , value in dict_vote.items() if value == max(dict_vote.values()) and key != -1]
 
         return list_candidate
 
-    def majority_vote(self,list_candidate:list)->list:
+    def get_random_candidate_from_maximum_candidate(self,list_candidate:list)->list:
+        """
+        從最高票的候選人中隨機挑出一個 \n
+        list_candidate -> 最高票的候選人list \n
+        return value : \n
+            list -> 挑出一個
+        """
+
         # reset vote state
         self.__reset_current_vote__()
         return random.sample(list_candidate)
@@ -201,27 +228,42 @@ class env():
     
     def player_vote(self,player_number,want_to_vote_player_number):
         """
-
-        people player want to vote for
+        people player want to vote for \n
         player_number -> 投票玩家編號 \n
         want_to_vote_player_number -> 被投票玩家編號 \n
-        
         """
 
         self.list_players[player_number].vote(want_to_vote_player_number)
 
-    def __setting_voted_player__(self)->list:
+    def __update_current_voted_player__(self)->list:
+        """
+        update current voted player \n
+        return value : \n
+            list -> list of current voted
+        """
+        
         list_current_vote = [-1]*self.num_player
         for idx , each_player  in enumerate(self.list_players):
             list_current_vote[idx] = each_player.current_vote_player_number 
         return list_current_vote
     
-    # get number of voted player 
     def get_num_of_voted_player(self)->int:
-        list_current_vote = self.__setting_voted_player__()
+        """
+        get number of current vote [current vote number / total vote number] \n
+        return value : \n
+            int -> number of current vote
+        """
+
+        list_current_vote = self.__update_current_voted_player__()
         return self.num_player - list_current_vote.count(-1)
     
     def __check_player_vote_state__(self,list_current_vote)->bool:
+        """
+        check the vote condition \n
+        list_current_vote -> list of vote state [-1,-1,2,4,5,6] \n
+        return value : \n
+            bool -> True(all vote), False(not yet) 
+        """
 
         # all player vote 
         if  list_current_vote.count(-1) == 0:
@@ -239,7 +281,7 @@ class env():
         
         """
 
-        list_current_vote = self.__setting_voted_player__()
+        list_current_vote = self.__update_current_voted_player__()
         list_candidate = self.__find_maximum_voted_candidate__(list_current_vote)
         
         # return possible candidate(multiple)
@@ -251,12 +293,20 @@ class env():
         return True, list_candidate
 
     def __reset_current_vote__(self):
+        """
+        reset all player vote state \n
+        """
 
         for each_player in self.list_players:
             each_player.current_vote_player_number = -1
 
     def kill_or_save(self,target_player_number:int,mode:int):
-        
+        """
+        kill someone or save someone \n
+        target_player_number -> want to kill or save \n
+        mode -> 1(save) , -1(kill)
+        """
+
         self.list_players[target_player_number].__update_state__()
         if self.list_players[target_player_number].role == "village":
             self.num_village += mode
@@ -331,8 +381,8 @@ if __name__ == "__main__":
     
     # 時間到
     if not result :
-        # 但沒決定出一個人，就多數決
-        list_candidate = env.majority_vote(list_candidate=list_candidate)
+        # 但沒決定出一個人，就直接從高票中挑一個
+        list_candidate = env.get_random_candidate_from_maximum_candidate(list_candidate=list_candidate)
     # kill 決定的該名玩家
     killed_player = list_candidate[0]
     env.kill(killed_player)
@@ -352,11 +402,12 @@ if __name__ == "__main__":
     result , list_candidate = env.round_vote()
     # 時間到
     if not result :
+        # !!沒RESET
         # 平票的人PK
         env.player_vote(player_number=0,want_to_vote_player_number=1)
         result , list_candidate = env.round_vote()
-        # 但沒決定出一個人，就多數決
-        list_candidate = env.majority_vote(list_candidate=list_candidate)
+        # 但沒決定出一個人，就直接從高票中挑一個
+        list_candidate = env.get_random_candidate_from_maximum_candidate(list_candidate=list_candidate)
     # kill 決定的該名玩家
     killed_player = list_candidate[0]
     env.kill(killed_player)
