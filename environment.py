@@ -87,21 +87,35 @@ class env():
 
         return list_assigned_roles
     
-    def get_dict_assigned_roles(self):
+    def get_dict_assigned_roles(self)->dict:
+        """
+        return assigned roles \n
+        for example: \n
+        { 0 : seer, 1 : witch, 2 : village, 3 : village, 4 : werewolf, 5 : werewolf}
+        """
+        
         return self.dict_assigned_roles
     
     def day(self):
-        # if self.list_players[self.killed_player_number].role == "hunter":
-        #     self.hunter_kill(player_number=self.killed_player_number,target_player_number=)
+        """
+        setting when into day
+        """
+        
+        # become day
         self.state = 1
 
     def night(self):
+        """
+        setting when into night
+        """
+        
+        # become night
         self.state = 0
         self.kill_and_save_record.append(dict())
+        # reset save use
+        self.save_use = False
+        # next round 
         self.round += 1
-        
-        print(f"\nRound {self.round}\n")
-        
 
     def choose_comment(self)->int:
         """
@@ -109,13 +123,22 @@ class env():
         return value : \n
             The player number which be chosen.
         """
+
         self.current_comment_player_number = random.randint(0,self.num_player-1)
         return self.current_comment_player_number
     
     def update_comment_player_number(self):
+        """
+        next comment player
+        """
+
         self.current_comment_player_number = (self.current_comment_player_number+1) % self.num_player
     
-    def get_current_comment_player_number(self):
+    def get_current_comment_player_number(self)->int:
+        """
+        return current comment player number
+        """
+        
         return self.current_comment_player_number
     
     def kill_or_save(self,target_player_number:int,mode:int):
@@ -128,10 +151,14 @@ class env():
         state = 1
         if mode == -1:
             state = 0
+        
+        # state not change
         if self.get_player_info(player_number=target_player_number)["state"] == state:
             return 
+        # change state
         self.list_players[target_player_number].__update_state__(state= state)
 
+        # update number of village, werewolf, god
         if self.list_players[target_player_number].role == "village":
             self.num_village += mode
         elif self.list_players[target_player_number].role == "werewolf":
@@ -145,15 +172,23 @@ class env():
         return value: \n
             bool -> whether end game ,True(end game), False(not yet)\n
             int -> 0(bad camp win), 1(good camp win) 
-
         """
-        print(self.num_god,self.num_village,self.num_werewolf)
+
+        
         if self.num_god <= 0 or self.num_village <= 0 :
             return True, 0
         elif self.num_werewolf <= 0:
             return True, 1
         
         return False, None
+    
+    def get_camp_number(self)->list:
+        """
+        return number of village, werewolf, god \n
+        [ god , village , werewolf ]
+        """
+
+        return [self.num_god,self.num_village,self.num_werewolf]
     
     """ vote func """
 
@@ -189,6 +224,10 @@ class env():
         self.__save_record__(player_number=list_candidate[0],kind=self.state)
 
     def get_list_candidate(self)->list:
+        """
+        get maximum_voted_candidate
+        """
+
         list_current_vote = self.__update_current_player_voted__()
         return self.__find_maximum_voted_candidate__(list_current_vote)
     
@@ -213,8 +252,13 @@ class env():
             list_current_vote[idx] = each_player.current_vote_player_number 
         return list_current_vote
     def get_current_player_voted(self)->dict:
+        """
+        return current player voted \n
+        example : \n
+        {0 : 4, 1 : 0, 2 : 5, 3 : 5, 4 : 5, 5 : 3}
+        """
+
         list_current_vote = self.__update_current_player_voted__()
-        
         return {idx:each for idx, each in enumerate(list_current_vote) if each != -1}
     def get_num_of_voted_player(self)->int:
         """
@@ -245,14 +289,12 @@ class env():
         """
         each round the result of all player vote \n
         return value: \n
-            bool -> 是否決定出一個玩家 \n
-            list -> 決定出的玩家是誰
-        
+            bool -> 是否決定出一個玩家
         """
 
         list_current_vote = self.__update_current_player_voted__()
         list_candidate = self.__find_maximum_voted_candidate__(list_current_vote)
-        print(list_candidate)
+        
         # multiple candidate or not all werewolf vote
         if len(list_candidate) != 1 or self.__check_player_vote_state__(list_current_vote):
             return False
@@ -287,12 +329,19 @@ class env():
 
     """ witch func"""
     
-    def witch_has_save(self,player_number):
+    def witch_has_save(self,player_number)->bool:
+        """
+        check witch whether has saved times
+        """
         
         if self.get_player_info(player_number)["save_times"] <= 0 :
             return False
         return True
-    def witch_has_poison(self,player_number):
+    def witch_has_poison(self,player_number)->bool:
+        """
+        check witch whether has kill times
+        """
+
         if self.get_player_info(player_number)["kill_times"] <= 0:
             return False
         return True
@@ -338,6 +387,7 @@ class env():
             True -> success poisoning  \n
             False -> failed poisoning
         """
+
         current_killed_player = self.get_current_killed_player()
         # you aren't witch, witch is died, witch didn't use, kill_times ran out, the target player is died
         if  self.list_players[player_number].role != "witch" or \
@@ -347,8 +397,8 @@ class env():
             (not self.list_players[player_number].state and current_killed_player != player_number ) or \
             (not self.list_players[target_player_number].state and current_killed_player != target_player_number):
             
-            self.save_use = False
             return False
+        
         self.kill_or_save(target_player_number=target_player_number,mode=-1)
         self.__save_record__(player_number=target_player_number,kind=2)
         self.list_players[player_number].kill_times -= 1
@@ -366,8 +416,9 @@ class env():
             True -> success killing \n
             False -> failed killing
         """
+
         # you aren't hunter, hunter didn't use, kill_times ran out, the target player is died
-        if self.list_players[player_number].role != "hunter" or target_player_number == -1 or self.list_players[player_number].kill_times <= 0 or not self.list_players[target_player_number].state:
+        if self.list_players[player_number].role != "hunter" or target_player_number == -1 or self.list_players[player_number].kill_times <= 0 or not self.list_players[target_player_number].state or not self.list_players[player_number].state:
             return False
         self.kill_or_save(target_player_number=target_player_number,mode=-1)
         self.__save_record__(player_number=target_player_number,kind=4)
@@ -408,40 +459,90 @@ class env():
         return True
     
     def __save_record__(self,player_number:int,kind:int):
+        """
+        save record, include kill(0), voted(1), poison(2), save(3), hunterKill(4) \n
+        player_number -> target player number \n
+        kind -> kill(0), voted(1), poison(2), save(3), hunterKill(4)
+        """
+
         self.kill_and_save_record[self.round-1][kind]=player_number
 
-    def get_killed_player_by_round(self,round)->int:
-        
+    def get_killed_player_by_round(self,round:int)->int:
+        """
+        get kill player in specified round \n
+        return value: \n
+        int -> player number
+        """
+
         try:
             return self.kill_and_save_record[round-1][0]
         except:
             return None
         
     def get_current_killed_player(self)->int:
+        """
+        get kill player in current round \n
+        return value: \n
+        int -> player number
+        """
+
         return self.get_killed_player_by_round(self.round)
     
     def get_voted_player_by_round(self,round)->int:
+        """
+        get voted player in specified round \n
+        return value: \n
+        int -> player number
+        """
+
         try:
             return self.kill_and_save_record[round-1][1]
         except:
             return None
     
     def get_current_voted_player(self)->int:
+        """
+        get voted player in current round \n
+        return value: \n
+        int -> player number
+        """
+
         return self.get_voted_player_by_round(self.round)
     
     def get_poisoned_player(self)->tuple[int,int]:
+        """
+        get poisoned player & which round \n
+        return value: \n
+        int -> player number
+        int -> which round
+        """
+
         for round , record in enumerate(self.kill_and_save_record):
             if record.get(2) != None:
                 return round , record[2]
         return None
     
     def get_save_player(self)->tuple[int,int]:
+        """
+        get save player & which round \n
+        return value: \n
+        int -> player number
+        int -> which round
+        """
+
         for round , record in enumerate(self.kill_and_save_record):
             if record.get(3) != None:
                 return round , record[3]
         return None
     
     def get_hunterKill_player(self)->tuple[int,int]:
+        """
+        get hunterKill player & which round \n
+        return value: \n
+        int -> player number
+        int -> which round
+        """
+
         for round , record in enumerate(self.kill_and_save_record):
             if record.get(4) != None:
                 return round , record[4]
@@ -466,16 +567,29 @@ class env():
         return value : \n
             int -> state, live(1), died(0)
         """ 
+
         return [each.state for each in self.list_players]
     
-    def get_player_dialogue(self,number:int)->dict:
-        return self.list_players[number].dialogues
+    def get_player_dialogue(self,player_number:int)->dict:
+        """
+        get dialogue of specified player 
+        """
+
+        return self.list_players[player_number].dialogues
     
-    def save_player_dialogue(self,player_number,dialogue_content):
-    
+    def save_player_dialogue(self,player_number:int,dialogue_content:str):
+        """
+        save dialogue of specified player \n
+        format is dict
+        """
+
         self.list_players[player_number].dialogues[self.round] = dialogue_content
     
     def get_current_vote_player_number(self,player_number:int):
+        """
+        get current vote player number
+        """
+
         return self.list_players[player_number].current_vote_player_number
 
 class role():
@@ -509,11 +623,6 @@ class role():
     def __vote__(self,player_number:int):
         self.current_vote_player_number = player_number
 
-"""
-    6 players : 1 seer , 1 witch , 2 villages , 2 werewolves
-    7 players : 1 seer , 1 witch , 1 hunter , 2 villages , 2 werewolves
-
-"""
 if __name__ == "__main__":
 
     

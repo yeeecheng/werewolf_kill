@@ -4,8 +4,8 @@ import random
 envi = env()
 # 分配角色
 dict_assigned_roles = envi.start_game(roles=[0,1,2,2,3,3])
-print()
-print("Stage: role assign")
+
+print("\nStage: role assign")
 for idx ,role in dict_assigned_roles.items():
     print(f"player {idx}({role})")
 print()
@@ -27,7 +27,7 @@ while not final_res:
 
     # 確認投票狀態
     result = envi.night_werewolf_vote()
-    print(result)
+    
     # 時間到
     if not result :
         # 但沒決定出一個人，就直接從高票中挑一個
@@ -42,7 +42,7 @@ while not final_res:
     # 預言家查身分
     target_player_number = 3 
     identity = envi.seer_check_identity(player_number=0,target_player_number=target_player_number)
-    print(f"The seer check player number {target_player_number} is {identity} [good(1),bad(0)]")
+    print(f"The seer check player number {target_player_number} is {identity} [good(1),bad(0)]\n")
 
     # 女巫 救人
     target_player_number = killed_player
@@ -52,9 +52,9 @@ while not final_res:
 
     save_res = envi.witch_save(player_number=1, target_player_number= killed_player)
     if save_res:
-        print(f"witch save player number {target_player_number}")
+        print(f"witch save player number {target_player_number}\n")
     else :
-        print("witch didn't use save")
+        print("witch didn't use save\n")
 
 
     # 女巫 毒人
@@ -62,11 +62,11 @@ while not final_res:
     res = envi.witch_poison(player_number=1, target_player_number= target_player_number)
 
     if res:
-        print(f"witch poison player number {target_player_number}")
+        print(f"witch poison player number {target_player_number}\n")
     else :
-        print("witch didn't use poison")
+        print("witch didn't use poison\n")
 
-    print(envi.get_all_player_state())
+    print(f"all player state : {envi.get_all_player_state()}")
     # !!進入白天
     envi.day()
     # 公布誰被殺了
@@ -80,7 +80,7 @@ while not final_res:
 
     # 決定從誰發言
     start_comment_number = envi.choose_comment()
-    print(start_comment_number)
+    print(f"\nstart from player number :{start_comment_number}\n")
     # 大家發言
 
     envi.save_player_dialogue(player_number=start_comment_number,dialogue_content="hello")
@@ -131,7 +131,7 @@ while not final_res:
             envi.player_vote(player_number=player_number,want_to_vote_player_number=want_to_vote_player_number)
         
         # 確認誰投誰
-        print("Stage: confirm round 2 voted state")
+        print("\nStage: confirm round 2 voted state")
         for idx ,player_voted in envi.get_current_player_voted().items():
             print(f"player {idx} voted player {player_voted}")
         print()
@@ -141,8 +141,8 @@ while not final_res:
             envi.random_candidate_from_maximum_candidate()
     # kill 決定的該名玩家
     voted_player = envi.get_current_voted_player()
-    print(f"all player voted player {voted_player}")
-    print()
+    print(f"all player voted player {voted_player}\n")
+    
     envi.kill_or_save(target_player_number=voted_player,mode=-1)
 
     # 如果死的是獵人，啟動能力
@@ -151,7 +151,7 @@ while not final_res:
 
     # !!檢查遊戲是否結束
     final_res , who_win = envi.check_end_game()
-    print(final_res,who_win)
+
     if final_res:
         if who_win : 
             print("good camp win")
