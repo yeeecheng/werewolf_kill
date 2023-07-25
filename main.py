@@ -56,7 +56,6 @@ while not final_res:
     else :
         print("witch didn't use save\n")
 
-
     # 女巫 毒人
     target_player_number = 4
     res = envi.witch_poison(player_number=1, target_player_number= target_player_number)
@@ -93,7 +92,6 @@ while not final_res:
         envi.update_comment_player_number()
         current_comment_player_number =envi.get_current_comment_player_number()
 
-
     # 發言後投票 
 
     envi.reset_vote()
@@ -116,10 +114,9 @@ while not final_res:
     # 確認投票狀態
     result = envi.round_vote()
 
-
     # 時間到
     if not result :
-        # !!沒RESET
+
         # 平票的人PK
         all_player_state= envi.get_all_player_state()
         list_candidate = envi.get_list_candidate()
