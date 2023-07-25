@@ -29,7 +29,7 @@ class env():
         with open("./role_setting.json") as file:
             self.dict_role_setting = json.load(file)
         
-        self.kill_and_save_record = list()
+        self.record = list()
 
 
     # start game
@@ -111,17 +111,19 @@ class env():
         
         # become night
         self.state = 0
-        self.kill_and_save_record.append(dict())
+        self.record.append(dict())
         # reset save use
         self.save_use = False
         # next round 
         self.round += 1
+
     def get_current_round(self)->int:
         """
         get current round
         """
 
         return self.round
+    
     def choose_comment(self)->int:
         """
         choose someone to comment \n
@@ -330,6 +332,7 @@ class env():
         # you aren't seer, seer is died, the target player is died 
         if self.list_players[player_number].role != "seer" or not self.list_players[player_number].state or not self.list_players[target_player_number].state :
             return -1
+        self.__save_record__(player_number=target_player_number,kind=2)
         return self.list_players[target_player_number].identity
 
     """ witch func"""
@@ -374,9 +377,9 @@ class env():
         self.kill_or_save(target_player_number=target_player_number,mode=1)
         
         # remove kill record
-        self.kill_and_save_record[self.round-1].pop(0)
+        self.record[self.round-1].pop(0)
         # add save record
-        self.__save_record__(player_number=target_player_number,kind=3)
+        self.__save_record__(player_number=target_player_number,kind=4)
         
         self.list_players[player_number].save_times -= 1
         self.save_use = True
@@ -405,7 +408,7 @@ class env():
             return False
         
         self.kill_or_save(target_player_number=target_player_number,mode=-1)
-        self.__save_record__(player_number=target_player_number,kind=2)
+        self.__save_record__(player_number=target_player_number,kind=3)
         self.list_players[player_number].kill_times -= 1
         return True
 
@@ -426,7 +429,7 @@ class env():
         if self.list_players[player_number].role != "hunter" or target_player_number == -1 or self.list_players[player_number].kill_times <= 0 or not self.list_players[target_player_number].state or not self.list_players[player_number].state:
             return False
         self.kill_or_save(target_player_number=target_player_number,mode=-1)
-        self.__save_record__(player_number=target_player_number,kind=4)
+        self.__save_record__(player_number=target_player_number,kind=5)
         self.list_players[player_number].kill_times -= 1
         return True
 
@@ -465,12 +468,12 @@ class env():
     
     def __save_record__(self,player_number:int,kind:int):
         """
-        save record, include kill(0), voted(1), poison(2), save(3), hunterKill(4) \n
+        save record, include kill(0), voted(1), seer(2), poison(3), save(4), hunterKill(5) \n
         player_number -> target player number \n
-        kind -> kill(0), voted(1), poison(2), save(3), hunterKill(4)
+        kind -> kill(0), voted(1), seer(2), poison(3), save(4), hunterKill(5)
         """
 
-        self.kill_and_save_record[self.round-1][kind]=player_number
+        self.record[self.round-1][kind]=player_number
 
     def get_killed_player_by_round(self,round:int)->int:
         """
@@ -480,7 +483,7 @@ class env():
         """
 
         try:
-            return self.kill_and_save_record[round-1][0]
+            return self.record[round-1][0]
         except:
             return None
         
@@ -501,7 +504,7 @@ class env():
         """
 
         try:
-            return self.kill_and_save_record[round-1][1]
+            return self.record[round-1][1]
         except:
             return None
     
@@ -514,6 +517,27 @@ class env():
 
         return self.get_voted_player_by_round(self.round)
     
+    def get_seer_player_by_round(self,round)->int:
+        """
+        get seer player in specified round \n
+        return value: \n
+        int -> player number
+        """
+
+        try:
+            return self.record[round-1][2]
+        except:
+            return None
+    
+    def get_current_seer_player(self)->int:
+        """
+        get seer player in current round \n
+        return value: \n
+        int -> player number
+        """
+
+        return self.get_voted_player_by_round(self.round)
+        
     def get_poisoned_player(self)->tuple[int,int]:
         """
         get poisoned player & which round \n
@@ -522,9 +546,9 @@ class env():
         int -> which round
         """
 
-        for round , record in enumerate(self.kill_and_save_record):
-            if 2 in record:
-                return round , record[2]
+        for round , record in enumerate(self.record):
+            if 3 in record:
+                return round , record[3]
         return None, None
     
     def get_save_player(self)->tuple[int,int]:
@@ -535,9 +559,9 @@ class env():
         int -> which round
         """
 
-        for round , record in enumerate(self.kill_and_save_record):
-            if 3 in record:
-                return round , record[3]
+        for round , record in enumerate(self.record):
+            if 4 in record:
+                return round , record[4]
         return None, None
     
     def get_hunterKill_player(self)->tuple[int,int]:
@@ -548,10 +572,10 @@ class env():
         int -> which round
         """
 
-        for round , record in enumerate(self.kill_and_save_record):
+        for round , record in enumerate(self.record):
             
-            if 4 in record:
-                return round , record[4]
+            if 5 in record:
+                return round , record[5]
         return None, None
 
     """ get player information func"""
