@@ -3,7 +3,7 @@ import random
 
 envi = env()
 # 分配角色
-dict_assigned_roles = envi.start_game(roles=[0,1,2,2,3,3])
+dict_assigned_roles = envi.start_game(roles=[0,1,2,2,3,3,4])
 
 print("\nStage: role assign")
 for idx ,role in dict_assigned_roles.items():
@@ -13,7 +13,7 @@ final_res , who_win = envi.check_end_game()
 while not final_res:
     # !!進入夜晚
     envi.night()
-
+    print(f"Round : {envi.get_current_round()}")
     envi.reset_vote()
     # 狼人投票殺人, call player_vote()
     envi.player_vote(player_number=0,want_to_vote_player_number=1)
@@ -148,7 +148,10 @@ while not final_res:
     # 如果死的是獵人，啟動能力
     if dict_assigned_roles[voted_player] == "hunter":
         envi.hunter_kill(player_number=3,target_player_number=5)
+        hunterKill_player ,round= envi.get_hunterKill_player()
+        print(f"hunter kill player {hunterKill_player}")
 
+    print(f"all player state : {envi.get_all_player_state()}")
     # !!檢查遊戲是否結束
     final_res , who_win = envi.check_end_game()
 

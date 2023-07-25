@@ -68,7 +68,7 @@ class env():
         """
         
         # list_assigned_roles = random.sample(self.roles , self.num_player)
-        list_assigned_roles = [0,1,2,2,3,3] 
+        list_assigned_roles = [0,1,2,2,3,3,4] 
         list_players = [0]*self.num_player
         # create roles 
         for idx in range(self.num_player):
@@ -116,7 +116,12 @@ class env():
         self.save_use = False
         # next round 
         self.round += 1
+    def get_current_round(self)->int:
+        """
+        get current round
+        """
 
+        return self.round
     def choose_comment(self)->int:
         """
         choose someone to comment \n
@@ -513,40 +518,41 @@ class env():
         """
         get poisoned player & which round \n
         return value: \n
-        int -> player number
+        int -> player number \n
         int -> which round
         """
 
         for round , record in enumerate(self.kill_and_save_record):
-            if record.get(2) != None:
+            if 2 in record:
                 return round , record[2]
-        return None
+        return None, None
     
     def get_save_player(self)->tuple[int,int]:
         """
         get save player & which round \n
         return value: \n
-        int -> player number
+        int -> player number \n
         int -> which round
         """
 
         for round , record in enumerate(self.kill_and_save_record):
-            if record.get(3) != None:
+            if 3 in record:
                 return round , record[3]
-        return None
+        return None, None
     
     def get_hunterKill_player(self)->tuple[int,int]:
         """
         get hunterKill player & which round \n
         return value: \n
-        int -> player number
+        int -> player number \n
         int -> which round
         """
 
         for round , record in enumerate(self.kill_and_save_record):
-            if record.get(4) != None:
+            
+            if 4 in record:
                 return round , record[4]
-        return None
+        return None, None
 
     """ get player information func"""
 
@@ -554,7 +560,7 @@ class env():
         """
         get the player all information \n
         player_number -> target player number \n
-        return value :
+        return value : \n
             dict -> information
         """
 
