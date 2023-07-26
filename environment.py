@@ -31,6 +31,11 @@ class env():
         
         self.record = list()
 
+        self.current_stage = 0
+        self.all_stage = ["werewolf","seer","witch","hunter1","dialogue","vote1","vote2","hunter2","round_end"]
+        
+        self.list_has_commented_player_number = list()
+
 
     # start game
     def start_game(self,roles:list)->list:
@@ -56,9 +61,9 @@ class env():
         
         list_assigned_roles = self.__assign_roles__()
 
-        self.dict_assigned_roles = {idx:self.dict_role_setting[str(each)]["role"] for idx,each in enumerate(list_assigned_roles)}
+        self.dict_player_number_to_roles = {idx:self.dict_role_setting[str(each)]["role"] for idx,each in enumerate(list_assigned_roles)}
 
-        return self.dict_assigned_roles
+        return self.dict_player_number_to_roles
         
     def __assign_roles__(self)->list():
         """
@@ -87,15 +92,159 @@ class env():
 
         return list_assigned_roles
     
-    def get_dict_assigned_roles(self)->dict:
+    def stage(self)->list():
+        # tuple[list,str,list,str]
+        """
+        return value : \n
+        user id , operation ,  white list , description
+        """
+        list_live_player = [player_state for player_state in self.get_all_player_state() if player_state == 1]
+        stage_return = list()
+        if self.all_stage[self.current_stage] == "werewolf":
+            
+            stage_return.append((self.get_dict_roles_to_player_number()["werewolf"],"vote",list_live_player,"狼人投票殺人"))
+
+        elif self.all_stage[self.current_stage] == "seer":
+            
+            seer_number = self.get_dict_roles_to_player_number()["seer"]
+            killed_player = self.get_werewolf_vote_res()
+
+            stage_return.append((killed_player,"died",[],"狼殺人"))
+            if self.list_players[seer_number].state:
+                stage_return.append((seer_number,"see",list_live_player,"預言家查身分"))
+            
+        elif self.all_stage[self.current_stage] == "witch":
+            
+            witch_number = self.get_dict_roles_to_player_number()["witch"]
+            if self.list_players[witch_number].state:
+                if self.list_players[witch_number].save_times > 0 :
+                    stage_return.append((witch_number,"save",[self.get_current_killed_player()],"女巫救人"))
+                if self.list_players[witch_number].kill_times > 0 :
+                    stage_return.append((witch_number,"kill",list_live_player,"女巫毒人"))            
+            
+        elif self.all_stage[self.current_stage] == "hunter1" :
+            
+            stage_return.append((self.get_dict_roles_to_player_number()["hunter"],"kill",list_live_player,"獵人殺人"))
+            
+        elif self.all_stage[self.current_stage] == "dialogue":
+            
+            # add dialogue of player number who has commented 
+            for player_number in self.list_has_commented_player_number:
+                dialogue = self.get_player_dialogue(player_number=player_number)[self.round]
+                stage_return.append(([player_number],"chat",[],dialogue))
+            # set next commend player
+            stage_return.append(([self.current_comment_player_number],"dialogue",list_live_player,"玩家發言"))
+            self.list_has_commented_player_number.append(self.current_comment_player_number)
+
+            if self.current_comment_player_number != (self.start_comment_player_number-1):
+                self.current_stage -= 1
+                self.update_comment_player_number()
+            
+        elif self.all_stage[self.current_stage] == "vote1":
+
+            stage_return.append((list_live_player,"vote",list_live_player,"投票階段"))
+            
+        elif self.all_stage[self.current_stage] == "vote2":
+
+            list_candidate = self.get_list_candidate()
+            stage_return.append((list_live_player,"vote",list_candidate,"投票階段"))
+        
+        elif self.all_stage[self.current_stage] == "hunter2" :
+            
+            hunter_number = self.get_current_player_voted()
+            stage_return.append(([hunter_number],"died",[],"投票結果"))
+            stage_return.append(([hunter_number],"kill",list_live_player,"獵人殺人"))
+        elif self.all_stage[self.current_stage] == "round_end":
+            
+            if not self.hunter_use:
+                voted_number = self.get_current_player_voted()
+                stage_return.append(([voted_number],"died",[],"投票結果"))
+
+            final_res , who_win = self.check_end_game()
+            if final_res:
+                if who_win : 
+                    stage_return.append(([],"end",[],"好人陣營獲勝"))
+                else :
+                    stage_return.append(([],"end",[],"壞人陣營獲勝"))
+            else:
+                stage_return.append(([],"next",[],"下一天"))
+            
+        self.next_stage()
+        return stage_return    
+
+
+    def check_player_voted_state(self):
+        return self.__update_current_player_voted__()
+    
+    def next_stage(self):
+
+        self.current_stage += 1
+        
+        if self.current_stage == len(self.all_stage):
+            self.current_stage  = 0
+            self.night()
+
+        if self.all_stage[self.current_stage] == "hunter1":
+            self.day()
+            if self.dict_player_number_to_roles[self.get_current_killed_player()] !="hunter":
+                self.next_stage()
+
+        
+        elif self.all_stage[self.current_stage] == "vote2":
+            if self.round_vote() :
+                self.next_stage()
+        
+        elif self.all_stage[self.current_stage] == "hunter2":
+            voted_player_number = self.get_player_vote_res()
+            self.hunter_use = True
+            if self.dict_player_number_to_roles[voted_player_number] !="hunter":
+                self.hunter_use = False
+                self.next_stage()
+                
+    def get_werewolf_vote_res(self)->int:
+        # 確認投票狀態
+        if not self.night_werewolf_vote() :
+            # 但沒決定出一個人，就直接從高票中挑一個
+            self.random_candidate_from_maximum_candidate()
+
+        # 狼決定kill該名玩家
+        killed_player_number = self.get_current_killed_player()
+        self.kill_or_save(target_player_number=killed_player_number,mode=-1)
+        return killed_player_number
+    
+    def get_player_vote_res(self)->int:
+        
+        # 確認投票狀態
+        if not self.round_vote():
+            # 但沒決定出一個人，就直接隨機挑一個
+            self.random_candidate_from_maximum_candidate()
+        
+        # kill 決定的該名玩家
+        voted_player = self.get_current_voted_player()
+        self.kill_or_save(target_player_number=voted_player,mode=-1)
+        return voted_player
+
+    def get_dict_player_number_to_roles(self)->dict:
         """
         return assigned roles \n
         for example: \n
         { 0 : seer, 1 : witch, 2 : village, 3 : village, 4 : werewolf, 5 : werewolf}
         """
         
-        return self.dict_assigned_roles
+        return self.dict_player_number_to_roles
     
+    def get_dict_roles_to_player_number(self)->dict:
+        
+        self.dict_roles_to_player_number = dict()
+        for key , value in self.dict_player_number_to_roles.items():
+            try:
+                self.dict_roles_to_player_number[value].append(key)
+            except:
+                self.dict_roles_to_player_number[value] = list()
+                self.dict_roles_to_player_number[value].append(key)
+
+        return self.dict_roles_to_player_number
+
     def day(self):
         """
         setting when into day
@@ -103,6 +252,7 @@ class env():
         
         # become day
         self.state = 1
+        self.choose_comment()
 
     def night(self):
         """
@@ -124,15 +274,16 @@ class env():
 
         return self.round
     
-    def choose_comment(self)->int:
+    def choose_comment(self):
         """
         choose someone to comment \n
         return value : \n
             The player number which be chosen.
         """
-
-        self.current_comment_player_number = random.randint(0,self.num_player-1)
-        return self.current_comment_player_number
+        list_player_state = self.get_all_player_state()
+        live_players = [i for i in range(self.num_player) if list_player_state[i]]
+        self.current_comment_player_number = random.choice(live_players)
+        self.start_comment_player_number = self.current_comment_player_number
     
     def update_comment_player_number(self):
         """
@@ -659,6 +810,8 @@ if __name__ == "__main__":
     
     env = env()
     # 分配角色
-    # env.start_game(roles=[0,1,2,2,3,3])
+    env.start_game(roles=[0,1,2,2,3,3])
+    # print(env.get_dict_roles_to_player_number())
+    print(env.stage()[0][2])
 
     # info = env.get_player_info(player_number=1)
