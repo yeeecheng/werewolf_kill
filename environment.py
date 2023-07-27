@@ -30,9 +30,9 @@ class env():
             self.dict_role_setting = json.load(file)
         
         # 遊戲角色配置
-        self.roles = [ idx for idx ,value in enumerate(roles) for _ in range(value)]
+        self.roles_list = [ idx for idx ,value in enumerate(roles) for _ in range(value)]
         # number of player
-        self.num_player = len(self.roles)
+        self.num_player = len(self.roles_list)
 
         self.current_stage = 0
         self.all_stage = ["werewolf","seer","witch","check_end1","hunter1","check_end2","dialogue","vote1","vote2","hunter2","check_end3"]
@@ -52,6 +52,11 @@ class env():
 
         self.list_has_commented_player_number = list()
         self.record = list()
+
+        self.list_players = list()
+        # init from which player comment 
+        self.current_comment_player_number = 0
+        self.start_comment_player_number = self.current_comment_player_number
   
     """  Server Use func """
 
@@ -63,9 +68,8 @@ class env():
             dict_assigned_roles -> {player x: 分配後的角色}
         """
         
+        if not (int((len(self.roles_list)+1)/2) >  self.roles_list.count(3)) :
 
-        if not self.check_role_list(self.roles) :
-   
             print("at least one good identity")
             return 
         
