@@ -56,7 +56,8 @@ class env():
         self.list_players = list()
         # init from which player comment 
         self.current_comment_player_number = 0
-        self.start_comment_player_number = self.current_comment_player_number
+        self.end_comment_player_number = self.current_comment_player_number - 1
+        self.number_comment = 0
   
     """  Server Use func """
 
@@ -89,10 +90,19 @@ class env():
         
         list_live_player = [number for number , player_state in enumerate(self.__get_all_player_state__()) if player_state == 1]
         stage_return = list()
+        
         stage_return = self.all_stage_func[self.current_stage](list_live_player=list_live_player,stage_return=stage_return)
         
+
         self.__next_stage__()
-        return stage_return , self.__get_current_stage() 
+        current_stage = self.__get_current_stage() 
+        
+        # check current stage is dialogue
+        if  self.number_comment > 0 and self.current_comment_player_number != self.end_comment_player_number:
+            self.current_stage -= 1
+            self.__update_comment_player_number__()
+
+        return stage_return , current_stage
 
 
     def player_operation(self,player_number:int,operation:str, target_player_number:int, description:str,current_stage:str)->bool:
@@ -222,6 +232,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         if self.dict_player_number_to_roles[self.__get_current_killed_player__()] !="hunter":
             self.__next_stage__()
             self.__next_stage__()
+
             return self.all_stage_func[self.current_stage](list_live_player=list_live_player,stage_return=stage_return)
         stage_return.append((self.__get_dict_roles_to_player_number__()["hunter"],"vote_or_not",list_live_player,"獵人殺人"))
 
@@ -255,17 +266,16 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         current_comment = list_live_player[self.current_comment_player_number]
         
         stage_return.append(([current_comment],"dialogue",[],"玩家發言"))
+        self.number_comment -= 1
         # add to list_has_commented_player_number
         self.list_has_commented_player_number.append(current_comment)
     
-        if  self.current_comment_player_number != (self.start_comment_player_number-1+len(list_live_player)%len(list_live_player)):
-            self.current_stage -= 1
-            self.__update_comment_player_number__()
+        
 
         # reset list_has_commented_player_number
         if len(self.list_has_commented_player_number) == len(list_live_player):
             self.list_has_commented_player_number = list()
-
+        
         return stage_return
     
     def __stage_vote1__(self,list_live_player:list,stage_return:list)->list:
@@ -350,7 +360,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         return list_assigned_roles
     
     def __next_stage__(self):
-
+        
         self.current_stage = (self.current_stage+1) % len(self.all_stage)
         
     def __day__(self):
@@ -381,7 +391,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         list_live_player = self.__get_live_player_list__()
         self.current_comment_player_number = random.randint(1,len(list_live_player)-1)
         # list_live_player[self.current_comment_player_number] = player_number
-        self.start_comment_player_number = self.current_comment_player_number
+        self.end_comment_player_number = (self.current_comment_player_number-1+len(list_live_player)%len(list_live_player))
+        self.number_comment =len(list_live_player)
 
     def __update_comment_player_number__(self):
         """
