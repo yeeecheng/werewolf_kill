@@ -63,10 +63,11 @@ need_send_operation = ["vote","vote_or_not","dialogue"]
 def flow(stub,room_name,stage:list,stage_name:str):
     
     for each_operation in stage :
-    
+        
         for each_user in each_operation.user:
             print_info(user=each_user,info=each_operation,stage=stage_name)
             if each_operation.operation in need_send_operation:
+                # if each_operation
                 target = random.choice(each_operation.target)
 
                 if sendUserOperation(stub,user=each_user,operation=each_operation.operation,target=target,chat=each_operation.description,room_name=room_name,stage_name=stage_name):
@@ -83,7 +84,7 @@ def run():
     print(checkRoleList(stub,role=[1,1,3,3,1],room_name=room_name))
     
     role , room_name = startGame(stub,role=[1,0,2,2,1],room_name=room_name)
-
+    print(role)
     stage , stage_name = nextStage(stub,room_name="1",stage_name="")
     flow(stub=stub,room_name=room_name,stage=stage,stage_name=stage_name)
 

@@ -94,11 +94,6 @@ class env():
         self.__next_stage__()
         return stage_return , self.__get_current_stage() 
 
-    def __get_current_stage(self)->str:
-        if self.round == 0 :
-            return "None"
-
-        return str(self.round)+"-"+str(self.state)+"-"+self.all_stage[((self.current_stage-1)+len(self.all_stage)) % len(self.all_stage)]
 
     def player_operation(self,player_number:int,operation:str, target_player_number:int, description:str,current_stage:str)->bool:
         
@@ -150,6 +145,12 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
 
 
     """ Stage Use func """
+    def __get_current_stage(self)->str:
+        if self.round == 0 :
+            return "None"
+
+        return str(self.round)+"-"+str(self.state)+"-"+self.all_stage[((self.current_stage-1)+len(self.all_stage)) % len(self.all_stage)]
+    
     def __stage_werewolf__(self,list_live_player:list,stage_return:list)->list:
         
         self.__night__()
