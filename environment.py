@@ -248,6 +248,11 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         if end_game_res != None: 
             stage_return.append(end_game_res)
 
+        if len(stage_return)==0:
+
+            self.__next_stage__()
+            return self.all_stage_func[self.current_stage](list_live_player=list_live_player,stage_return=stage_return)
+
         return stage_return
     
     def __stage_dialogue__(self,list_live_player:list,stage_return:list)->list:
@@ -328,6 +333,11 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
 
         if end_game_res != None: 
             stage_return.append(end_game_res)
+        
+        if len(stage_return)==0:
+
+            self.__next_stage__()
+            return self.all_stage_func[self.current_stage](list_live_player=list_live_player,stage_return=stage_return)
 
         return stage_return
 
