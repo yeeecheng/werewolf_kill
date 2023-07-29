@@ -83,18 +83,45 @@ def run():
     room_name = "1"
     print(checkRoleList(stub,role=[1,1,3,3,1],room_name=room_name))
     
-    role , room_name = startGame(stub,role=[1,0,2,2,1],room_name=room_name)
+    role , room_name = startGame(stub,role=[1,1,2,2,1],room_name=room_name)
     print(role)
-    stage , stage_name = nextStage(stub,room_name="1",stage_name="")
-    flow(stub=stub,room_name=room_name,stage=stage,stage_name=stage_name)
 
     stage , stage_name = nextStage(stub,room_name="1",stage_name="")
-    flow(stub=stub,room_name=room_name,stage=stage,stage_name=stage_name)
-
+    print(stage_name)
+    # flow(stub,room_name=room_name,stage=stage,stage_name=stage_name)
     stage , stage_name = nextStage(stub,room_name="1",stage_name="")
-    flow(stub=stub,room_name=room_name,stage=stage,stage_name=stage_name)
-
-    
+    print(stage_name)
+    # flow(stub,room_name=room_name,stage=stage,stage_name=stage_name)
+    stage , stage_name = nextStage(stub,room_name="1",stage_name="")
+    print(stage_name)
+    # flow(stub,room_name=room_name,stage=stage,stage_name=stage_name)
+    stage , stage_name = nextStage(stub,room_name="1",stage_name="")
+    print(stage_name)
+    # flow(stub,room_name=room_name,stage=stage,stage_name=stage_name)
+    stage , stage_name = nextStage(stub,room_name="1",stage_name="")
+    print(stage_name)
+    stage , stage_name = nextStage(stub,room_name="1",stage_name="")
+    print(stage_name)
+    stage , stage_name = nextStage(stub,room_name="1",stage_name="")
+    print(stage_name)
+    stage , stage_name = nextStage(stub,room_name="1",stage_name="")
+    print(stage_name)
+    stage , stage_name = nextStage(stub,room_name="1",stage_name="")
+    print(stage_name)
+    stage , stage_name = nextStage(stub,room_name="1",stage_name="")
+    print(stage_name)
+    stage , stage_name = nextStage(stub,room_name="1",stage_name="")
+    print(stage_name)
+    stage , stage_name = nextStage(stub,room_name="1",stage_name="")
+    print(stage_name)
+    stage , stage_name = nextStage(stub,room_name="1",stage_name="")
+    print(stage_name)
+    stage , stage_name = nextStage(stub,room_name="1",stage_name="")
+    print(stage_name)
+    stage , stage_name = nextStage(stub,room_name="1",stage_name="")
+    print(stage_name)
+    stage , stage_name = nextStage(stub,room_name="1",stage_name="")
+    print(stage_name)
 
     
 

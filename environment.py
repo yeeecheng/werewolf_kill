@@ -188,12 +188,14 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
             witch_number = self.__get_dict_roles_to_player_number__()["witch"][0]
             if self.list_players[witch_number].state:
                 killed_player = self.__get_current_killed_player__()
+
                 if self.list_players[witch_number].save_times > 0 :
                     stage_return.append(([witch_number],"vote_or_not",[killed_player],"女巫救人"))
                 if self.list_players[witch_number].kill_times > 0 :
                     list_live_player.insert(killed_player,killed_player)
                     stage_return.append(([witch_number],"vote_or_not",list_live_player,"女巫毒人"))    
         except:
+
             self.__next_stage__()
             return self.all_stage_func[self.current_stage](list_live_player=list_live_player,stage_return=stage_return)
         return stage_return
@@ -202,7 +204,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         self.__day__()
         killed_player = self.__get_killed_player_by_round__(round=self.round)
         if  killed_player != None:
-            stage_return.append((killed_player,"died",[],"狼殺的人"))
+            stage_return.append(([killed_player],"died",[],"狼殺的人"))
 
         poison_player = self.__get_poisoned_player_by_round__(round=self.round)
     
@@ -244,7 +246,10 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
             self.__choose_comment__()
         # add dialogue of player number who has commented 
         for player_number in self.list_has_commented_player_number:
-            dialogue = self.__get_player_dialogue__(player_number=player_number)[self.round]
+            try:
+                dialogue = self.__get_player_dialogue__(player_number=player_number)[self.round]
+            except:
+                dialogue = ""
             stage_return.append(([player_number],"chat",[],dialogue))
         # set next commend player
         current_comment = list_live_player[self.current_comment_player_number]
@@ -959,15 +964,15 @@ if __name__ == "__main__":
     # 狼人殺人
     stage , stage_name = env.stage()
     print(stage)
-    env.player_operation(player_number=stage[0][0][0],operation="vote",target_player_number=6,description="",current_stage="1-0-werewolf")
-    env.player_operation(player_number=stage[0][0][1],operation="vote",target_player_number=6,description="",current_stage="1-0-werewolf")
+    #env.player_operation(player_number=stage[0][0][0],operation="vote",target_player_number=6,description="",current_stage="1-0-werewolf")
+    #env.player_operation(player_number=stage[0][0][1],operation="vote",target_player_number=6,description="",current_stage="1-0-werewolf")
 
     stage , stage_name =env.stage()
     print(stage)
 
     
     # 預言家查身分
-    env.player_operation(player_number=0,operation="vote",target_player_number=2,description="",current_stage="1-0-seer")
+   # env.player_operation(player_number=0,operation="vote",target_player_number=2,description="",current_stage="1-0-seer")
 
     
     stage , stage_name =env.stage()
@@ -978,38 +983,38 @@ if __name__ == "__main__":
     # 女巫 毒人
     target_player_number = random.choice(stage[1][2])
     #env.player_operation(player_number=[stage[1][0][0]],operation="",target_player_number=[5],description="save",current_stage="1-1-witch")
-    env.player_operation(player_number=stage[1][0][0],operation="vote_or_not",target_player_number=5,description="poison",current_stage="1-0-witch")
-    print(env.__get_all_player_state__())
+    #env.player_operation(player_number=stage[1][0][0],operation="vote_or_not",target_player_number=5,description="poison",current_stage="1-0-witch")
+    #print(env.__get_all_player_state__())
     stage , stage_name =env.stage()
     print(stage,stage_name)
     
     # 獵人殺人
     stage , stage_name =env.stage()
     print(stage,stage_name)
-    if stage[0][1] == "vote_or_not":
-        env.player_operation(player_number=stage[0][0][0],operation="vote_or_not",target_player_number=1,description="",current_stage="1-1-hunter1")
+    # if stage[0][1] == "vote_or_not":
+    #     env.player_operation(player_number=stage[0][0][0],operation="vote_or_not",target_player_number=1,description="",current_stage="1-1-hunter1")
     # check end
-        stage , stage_name =env.stage()
-        print(stage,stage_name)
+        # stage , stage_name =env.stage()
+        # print(stage,stage_name)
     
     print(env.__get_all_player_state__())
     # 對話 1
     stage , stage_name =env.stage()
     print(stage,stage_name)
-    env.player_operation(player_number=stage[-1][0][0],operation="dialogue",target_player_number=1,description="hello",current_stage="1-1-dialogue")
+    #env.player_operation(player_number=stage[-1][0][0],operation="dialogue",target_player_number=1,description="hello",current_stage="1-1-dialogue")
     
     # 對話 2
     stage , stage_name =env.stage()
     print(stage,stage_name)
-    env.player_operation(player_number=stage[-1][0][0],operation="dialogue",target_player_number=1,description="hello",current_stage="1-1-dialogue")
+    #env.player_operation(player_number=stage[-1][0][0],operation="dialogue",target_player_number=1,description="hello",current_stage="1-1-dialogue")
     # 對話 3
     stage , stage_name =env.stage()
     print(stage,stage_name)
-    env.player_operation(player_number=stage[-1][0][0],operation="dialogue",target_player_number=1,description="hello",current_stage="1-1-dialogue")
+    #env.player_operation(player_number=stage[-1][0][0],operation="dialogue",target_player_number=1,description="hello",current_stage="1-1-dialogue")
     # 對話 4
     stage , stage_name =env.stage()
     print(stage,stage_name)
-    env.player_operation(player_number=stage[-1][0][0],operation="dialogue",target_player_number=1,description="hello",current_stage="1-1-dialogue")
+    #env.player_operation(player_number=stage[-1][0][0],operation="dialogue",target_player_number=1,description="hello",current_stage="1-1-dialogue")
 
     # 投票
     stage , stage_name =env.stage()

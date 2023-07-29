@@ -39,11 +39,11 @@ class WerewolfKillService(p_wkpg.werewolf_killServicer):
         print(self.__current_state__(room_name=room_name))
         print(f"nextStage() passing value: role: {room_name}, room_name {stage_name}\n///")
         stage = list()
+        
         for each_stage in stage_return:
-
+            
             if each_stage[1] == "end":
                 self.dict_game_env[room_name].pop(room_name)
-
             stage.append(p_wkp.userStage(user=each_stage[0],operation=each_stage[1],target=each_stage[2],description=each_stage[3]))
         
         
