@@ -77,9 +77,10 @@ class env():
 
         self.dict_player_number_to_roles = {idx:self.dict_role_setting[str(each)]["role"] for idx,each in enumerate(list_assigned_roles)}
 
-        return self.dict_player_number_to_roles
+
+        return list_assigned_roles
     
-    def stage(self)->list():
+    def stage(self)->tuple[list(),str]:
         # tuple[list,str,list,str]
         """
         return value : \n
@@ -97,8 +98,8 @@ class env():
     def player_operation(self,player_number:int,operation:str, target_player_number:int, description:str,current_stage:str)->bool:
         
         
-        # if current_stage != str(self.round)+"-"+str(self.state)+"-"+self.all_stage[((self.current_stage-1)+len(self.all_stage)) % len(self.all_stage)] :
-        #     return False
+        if current_stage != str(self.round)+"-"+str(self.state)+"-"+self.all_stage[((self.current_stage-1)+len(self.all_stage)) % len(self.all_stage)] :
+            return False
         
         c_stage = current_stage.split("-")[2]
         
@@ -113,7 +114,7 @@ class env():
             self.operation[c_stage](player_number,target_player_number)
         
 
-        return False
+        return True
 
     def check_player_voted_state(self)->list:
         return self.__update_current_player_voted__()
@@ -920,7 +921,7 @@ if __name__ == "__main__":
     # 分配角色
     env = env(roles=[1,1,2,2,1])
     role_list = env.start_game()
-    
+    print(role_list)
     
     # 狼人殺人
     stage , stage_name = env.stage()

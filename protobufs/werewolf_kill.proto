@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+message result{
+    bool result = 1;
+}
+
+message roleList{
+    repeated int32 role = 1;
+    string room_name = 2;
+}
+
+message userStage{
+    repeated int32 user = 1;
+    string operation = 2;
+    repeated int32 target = 3;
+    string description = 4;
+}
+
+message roomInfo{
+    string room_name = 1;
+    string stage_name = 2;
+}
+
+message stage{
+    repeated userStage stage = 1;
+    string stage_name = 2;
+}
+
+message userOperation{
+    int32 user = 1;
+    string operation = 2;
+    int32 target = 3;
+    string chat = 4;
+    roomInfo room = 5;
+}
+
+message playerState{
+    repeated int32 state = 1;
+}
+
+message empty{
+
+}
+
+service werewolf_kill{
+
+    rpc checkRoleList (roleList) returns (result) {};
+    rpc startGame (roleList) returns (roleList) {};
+    rpc nextStage (roomInfo) returns (stage) {};
+    rpc sendUserOperation (userOperation) returns (result) {};
+    rpc voteInfo (roomInfo) returns (playerState) {};
+
+}
