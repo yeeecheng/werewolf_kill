@@ -92,8 +92,13 @@ class env():
         stage_return = self.all_stage_func[self.current_stage](list_live_player=list_live_player,stage_return=stage_return)
         
         self.__next_stage__()
-        return stage_return , str(self.round)+"-"+str(self.state)+"-"+self.all_stage[((self.current_stage-1)+len(self.all_stage)) % len(self.all_stage)]
-    
+        return stage_return , self.__get_current_stage() 
+
+    def __get_current_stage(self)->str:
+        if self.round == 0 :
+            return "None"
+
+        return str(self.round)+"-"+str(self.state)+"-"+self.all_stage[((self.current_stage-1)+len(self.all_stage)) % len(self.all_stage)]
 
     def player_operation(self,player_number:int,operation:str, target_player_number:int, description:str,current_stage:str)->bool:
         
@@ -126,6 +131,20 @@ class env():
 
         role_list = [ idx for idx ,value in enumerate(role_list) for _ in range(value)]
         return int((len(role_list)+1)/2) >  role_list.count(3)
+
+    def get_game_env(self):
+
+        current_stage = self.all_stage[self.current_stage]
+        player_state = self.__get_all_player_state__()
+        camp_number = self.__get_camp_number__()
+
+        return f"""
+Stage: {self.__get_current_stage()}
+Game Setting: {[f"player {key}: {value}" for key, value in self.dict_player_number_to_roles.items()]}
+god number: {camp_number[0]}, village number: {camp_number[1]}, werewolf number: {camp_number[2]}
+all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(player_state)]}
+        """
+
 
     """ Private Use func"""
 
@@ -161,7 +180,7 @@ class env():
         seed_player_number =self.__get_current_seer_player__()
         if seed_player_number != None:
             seer_number = self.__get_dict_roles_to_player_number__()["seer"][0]
-            stage_return.append(([seed_player_number],"role_info",[self.list_players[seed_player_number].identity],"預言家查的人"))
+            stage_return.append(([seer_number],"role_info",[seed_player_number],f"{self.list_players[seed_player_number].identity}"))
         try:    
             witch_number = self.__get_dict_roles_to_player_number__()["witch"][0]
             if self.list_players[witch_number].state:
@@ -897,7 +916,7 @@ class env():
 
     """ Didn't Use """
     
-    def get_camp_number(self)->list:
+    def __get_camp_number__(self)->list:
         """
         return number of village, werewolf, god \n
         [ god , village , werewolf ]
