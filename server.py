@@ -54,7 +54,6 @@ class WerewolfKillService(p_wkpg.werewolf_killServicer):
         room_name = request.room.room_name
         stage_name = request.room.stage_name
         print(self.__current_state__(room_name=room_name))
-        print(f"sendUserOperation() passing value: role: {room_name}, room_name: {stage_name}\n///")
         player_number = request.user
         operation = request.operation
         target = request.target
