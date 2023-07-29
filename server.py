@@ -16,7 +16,7 @@ class WerewolfKillService(p_wkpg.werewolf_killServicer):
 
     def checkRoleList(self,request,context):
         print("checkRoleList: No need room_name")
-        print(f"passing value: role: {request.role}, room_name {request.room_name}\n///")
+        print(f"passing value: role: {request.role}, room_name: {request.room_name}\n///")
         # print("checkRoleList:\n",request)
         return p_wkp.result(result=env.check_role_list(role_list=request.role))
 
@@ -28,7 +28,7 @@ class WerewolfKillService(p_wkpg.werewolf_killServicer):
         role_list = self.dict_game_env[room_name].start_game()
         
         print(self.__current_state__(room_name=room_name))
-        print(f"startGame() passing value: role: {request.role}, room_name {request.room_name}\n///")
+        print(f"startGame() passing value: role: {request.role}, room_name: {request.room_name}\n///")
         return p_wkp.roleList(role=role_list,room_name=room_name)
 
     def nextStage(self,request,context):
@@ -37,23 +37,24 @@ class WerewolfKillService(p_wkpg.werewolf_killServicer):
         stage_return , current_stage =  self.dict_game_env[room_name].stage()
         
         print(self.__current_state__(room_name=room_name))
-        print(f"nextStage() passing value: role: {room_name}, room_name {stage_name}\n///")
+        print(f"nextStage() passing value: role: {room_name}, room_name: {stage_name}\n///")
         stage = list()
         
         for each_stage in stage_return:
             
             if each_stage[1] == "end":
-                self.dict_game_env[room_name].pop(room_name)
+                self.dict_game_env.pop(room_name)
             stage.append(p_wkp.userStage(user=each_stage[0],operation=each_stage[1],target=each_stage[2],description=each_stage[3]))
         
         
         return p_wkp.stage(stage=stage,stage_name=current_stage)
 
     def sendUserOperation(self,request,context):
-        # print("sendUserOperation:\n",request)
+        
         room_name = request.room.room_name
         stage_name = request.room.stage_name
         print(self.__current_state__(room_name=room_name))
+        print(f"sendUserOperation() passing value: role: {room_name}, room_name: {stage_name}\n///")
         player_number = request.user
         operation = request.operation
         target = request.target
