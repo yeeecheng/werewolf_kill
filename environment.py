@@ -120,6 +120,9 @@ class env():
         return self.__update_current_player_voted__()
 
     def check_role_list(role_list:list)->bool:
+        """
+        return True(ok) , False(error)
+        """
 
         role_list = [ idx for idx ,value in enumerate(role_list) for _ in range(value)]
         return int((len(role_list)+1)/2) >  role_list.count(3)
@@ -155,10 +158,10 @@ class env():
         
     def __stage_witch__(self,list_live_player:list,stage_return:list)->list:
         
-    
-        if self.__get_current_seer_player__() != None:
+        seed_player_number =self.__get_current_seer_player__()
+        if seed_player_number != None:
             seer_number = self.__get_dict_roles_to_player_number__()["seer"][0]
-            stage_return.append(([seer_number],"vote",[self.__get_current_seer_player__()],"預言家查的人"))
+            stage_return.append(([seed_player_number],"role_info",[self.list_players[seed_player_number].identity],"預言家查的人"))
         try:    
             witch_number = self.__get_dict_roles_to_player_number__()["witch"][0]
             if self.list_players[witch_number].state:
@@ -177,12 +180,12 @@ class env():
         self.__day__()
         killed_player = self.__get_killed_player_by_round__(round=self.round)
         if  killed_player != None:
-            stage_return.append((killed_player,"died",[],"狼殺人"))
+            stage_return.append((killed_player,"died",[],"狼殺的人"))
 
         poison_player = self.__get_poisoned_player_by_round__(round=self.round)
     
         if  poison_player != None:
-            stage_return.append((poison_player,"died",[],"女巫毒人"))
+            stage_return.append((poison_player,"died",[],"女巫毒的人"))
         
         end_game_res = self.__get_end_game_res__()
         if end_game_res != None: 
