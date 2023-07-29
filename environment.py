@@ -98,8 +98,8 @@ class env():
     def player_operation(self,player_number:int,operation:str, target_player_number:int, description:str,current_stage:str)->bool:
         
         
-        # if current_stage != str(self.round)+"-"+str(self.state)+"-"+self.all_stage[((self.current_stage-1)+len(self.all_stage)) % len(self.all_stage)] :
-        #     return False
+        if current_stage != str(self.round)+"-"+str(self.state)+"-"+self.all_stage[((self.current_stage-1)+len(self.all_stage)) % len(self.all_stage)] :
+            return False
         
         c_stage = current_stage.split("-")[2]
         
