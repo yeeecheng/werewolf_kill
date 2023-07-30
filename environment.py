@@ -94,7 +94,7 @@ class env():
         stage_return = self.all_stage_func[self.current_stage](stage_return=stage_return)
         
         self.__next_stage__()
-        current_stage = self.__get_current_stage() 
+        current_stage = self.__get_current_stage__() 
         
         # check current stage is dialogue
         if  self.number_comment > 0 and self.current_comment_player_number != self.end_comment_player_number:
@@ -107,7 +107,7 @@ class env():
 
     def player_operation(self,player_number:int,operation:str, target_player_number:int, description:str,current_stage:str)->bool:
         
-        if current_stage != self.__get_current_stage() :
+        if current_stage != self.__get_current_stage__() :
             return False
         c_stage = current_stage.split("-")[2]
                 
@@ -145,7 +145,7 @@ class env():
         camp_number = self.__get_camp_number__()
 
         return f"""
-Stage: {self.__get_current_stage()}
+Stage: {self.__get_current_stage__()}
 Game Setting: {[f"player {key}: {value}" for key, value in self.dict_player_number_to_roles.items()]}
 god number: {camp_number[0]}, village number: {camp_number[1]}, werewolf number: {camp_number[2]}
 all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(player_state)]}
@@ -156,7 +156,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
 
 
     """ Stage Use func """
-    def __get_current_stage(self)->str:
+    def __get_current_stage__(self)->str:
         if self.round == 0 :
             return "None"
 
@@ -170,20 +170,14 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
             hunterKill_player =self.__get_hunterKill_player_by_round__(round=self.round)
             
             if hunterKill_player != None:
-                    # 傳出 被獵人殺的遺言
-                    try:
-                        dialogue =self.__get_player_dialogue__(player_number=hunterKill_player)[self.round-1][-1]
-                    except:
-                        dialogue = ""
-                    stage_return.append(([hunterKill_player],"chat",[],dialogue))
-            else :
-                if voted_player != None:
-                    # 傳出 被投玩家說的遺言
-                    try:
-                        dialogue = self.__get_player_dialogue__(player_number=voted_player)[self.round-1][-1]
-                    except:
-                        dialogue = ""
-                    stage_return.append(([voted_player],"chat",[],dialogue))
+                # 傳出 被獵人殺的遺言
+                dialogue = self.__get_dialogue__(player_number=hunterKill_player,kind=-1)
+                stage_return.append(([hunterKill_player],"chat",[],dialogue))
+            
+            elif voted_player != None:
+                # 傳出 被投玩家說的遺言
+                dialogue = self.__get_dialogue__(player_number=voted_player,kind=-1)
+                stage_return.append(([voted_player],"chat",[],dialogue))
                 
         except:
             pass
@@ -209,9 +203,9 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
     
         list_live_player = self.__get_live_player_list__()
         # check whether has seer
-        try:
-            seer_number = self.__get_dict_roles_to_player_number__()["seer"][0]
-        except:
+        seer_number = self.__get_role_number__("seer")
+        
+        if seer_number == None:
             self.__next_stage__()
             return self.all_stage_func[self.current_stage](stage_return=stage_return)
         
@@ -226,15 +220,10 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
             stage_return.append(([seer_number],"vote",[],"預言家查身分"))
             return stage_return
 
-
     def __stage_witch__(self,stage_return:list)->list:
         
         seed_player_number =self.__get_current_seer_player__()
-        
-        try:
-            seer_number = self.__get_dict_roles_to_player_number__()["seer"][0]
-        except:
-            seer_number = None
+        seer_number = self.__get_role_number__("seer")
 
         list_live_player = self.__get_live_player_list__()
         # seer whether exist
@@ -246,13 +235,11 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
                 seed_player_number =self.__get_current_seer_player__()
             
             if self.list_players[seer_number].state or self.__get_current_killed_player__()== seer_number:
-                stage_return.append(([seer_number],"role_info",[seed_player_number],f"{self.list_players[seed_player_number].identity}"))
+                identity = "好人" if self.list_players[seed_player_number].identity else "壞人"
+                stage_return.append(([seer_number],"role_info",[seed_player_number],f"是{identity}"))
         
-        try:
-            witch_number = self.__get_dict_roles_to_player_number__()["witch"][0]
-        except:
-            witch_number = None
-        
+        witch_number = self.__get_role_number__("witch")
+
         # witch whether exist
         if witch_number != None:
             # if witch is live
@@ -285,8 +272,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         list_live_player = self.__get_live_player_list__()
         # get werewolf kill player number
         killed_player = self.__get_killed_player_by_round__(round=self.round)
-        if  killed_player != None:
-            
+        
+        if  killed_player != None:    
             stage_return.append(([killed_player],"died",[],"昨晚死了"))
             # if it's first day, the died player can comment
             if self.round == 1:
@@ -307,28 +294,23 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
             stage_return.append(end_game_res)
 
         if len(stage_return) == 0: 
-            stage_return.append(([],"other",[],"昨晚平安夜"))
+            stage_return.append(([],"other",[],"昨晚是平安夜"))
+        
         return stage_return
     
     def __stage_check_end2__(self,stage_return:list)->list:
         
-        list_live_player = self.__get_live_player_list__()
         # get hunter kill player number
         hunterKill_player = self.__get_hunterKill_player_by_round__(round=self.round)
-        
         # if there is killed player, he can comment
         if  hunterKill_player != None:
             
-
             killed_player = self.__get_killed_player_by_round__(round=self.round)
             # 可能被救
             if killed_player != None:
+
                 # 獵人遺言
-                try:
-                    dialogue = self.__get_player_dialogue__(player_number=killed_player)[-1]
-                except:
-                    dialogue = ""
-                
+                dialogue = self.__get_dialogue__(player_number=killed_player,kind=-1)
                 stage_return.append(([killed_player],"chat",[],dialogue))
 
             stage_return.append(([hunterKill_player],"died",[],"被獵人帶走"))
@@ -341,7 +323,6 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
             stage_return.append(end_game_res)
 
         if len(stage_return)==0:
-
             self.__next_stage__()
             return self.all_stage_func[self.current_stage](stage_return=stage_return)
 
@@ -356,38 +337,26 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
             # There is hunterKill player
             hunterKill_player = self.__get_hunterKill_player_by_round__(round=self.round)
             if hunterKill_player != None:
-                # 遺言
-                try:
-                    dialogue = self.__get_player_dialogue__(player_number=hunterKill_player)[-1]
-                except:
-                    dialogue = ""
-                # add hunterKill player
+                # add hunterKill player 遺言
+                dialogue = self.__get_dialogue__(player_number=hunterKill_player,kind=-1)
                 stage_return.append(([hunterKill_player],"chat",[],dialogue))
             # There isn't hunterKill player
             else:
-                # add killed player
                 killed_player = self.__get_killed_player_by_round__(round=self.round)
                 if killed_player != None:
-                    # 遺言
-                    try:
-                        dialogue = self.__get_player_dialogue__(player_number=killed_player)[-1]
-                    except:
-                        dialogue = ""
+                    # add killed player 遺言
+                    dialogue = self.__get_dialogue__(player_number=killed_player,kind=-1)
                     stage_return.append(([killed_player],"chat",[],dialogue))
             
             self.__choose_comment__()
 
         # add dialogue of player number who has commented 
         if len(self.list_has_commented_player_number) != 0:
-            
             player_number =self.list_has_commented_player_number[-1]
             # previous dialogue
-            try:
-                dialogue = self.__get_player_dialogue__(player_number=player_number)[self.round][0]
-            except:
-                dialogue = ""
-
+            dialogue = self.__get_dialogue__(player_number=player_number,kind=0)
             stage_return.append(([player_number],"chat",[],dialogue))
+        
         # set next commend player
         current_comment = list_live_player[self.current_comment_player_number]
         
@@ -396,7 +365,6 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         # add to list_has_commented_player_number
         self.list_has_commented_player_number.append(current_comment)
     
-
         return stage_return
     
     def __stage_vote1__(self,stage_return:list)->list:
@@ -408,16 +376,12 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
             
             player_number =self.list_has_commented_player_number[-1]
             # previous dialogue
-            try:
-                dialogue = self.__get_player_dialogue__(player_number=player_number)[self.round][0]
-            except:
-                dialogue = ""
+            dialogue = self.__get_dialogue__(player_number=player_number,kind=0)
             stage_return.append(([player_number],"chat",[],dialogue))
 
         # reset list_has_commented_player_number
         if len(self.list_has_commented_player_number) == len(list_live_player):
             self.list_has_commented_player_number = list()
-
 
         # reset previous vote
         self.__reset_vote__()
@@ -462,23 +426,26 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         stage_return.append(([hunter_number],"dialogue",[],"發遺言"))
         stage_return.append(([hunter_number],"vote_or_not",list_live_player,"獵人殺人"))
         
+        end_game_res = self.__get_end_game_res__()
+
+        if end_game_res != None: 
+            stage_return.append(end_game_res)
+
         return stage_return
 
     def __stage_check_end3__(self,stage_return:list)->list:
         
-        list_live_player = self.__get_live_player_list__()
         voted_player_number = self.__get_voted_player_by_round__(round = self.round)
-
+        
         if self.dict_player_number_to_roles[voted_player_number] != "hunter":
             stage_return.append(([voted_player_number],"died",[],"被票出去了"))
-
             # 被投出去的人 要說遺言
             stage_return.append(([voted_player_number],"dialogue",[],"發遺言"))
+        
         else :
             hunterKill_player = self.__get_hunterKill_player_by_round__(round=self.round)
             if  hunterKill_player != None:
-                stage_return.append(([hunterKill_player],"died",[],"被獵人帶走了"))
-
+                stage_return.append(([hunterKill_player],"died",[],"被獵人帶走"))
                 # 被獵人殺的人 要說遺言
                 stage_return.append(([hunterKill_player],"dialogue",[],"發遺言"))
         
@@ -595,9 +562,16 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
 
         return self.dict_roles_to_player_number
 
+    def __get_role_number__(self,role_name:str)->int:
+        
+        try:
+            return self.__get_dict_roles_to_player_number__()[role_name][0]
+        except:
+            return None
+
     def __get_live_player_list__(self)->list:
         return [number for number , player_state in enumerate(self.__get_all_player_state__()) if player_state == 1]
-
+   
     def __check_end_game__(self)->tuple[bool,int]:
         """
         check whether end game \n
@@ -674,10 +648,9 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         if len(dict_vote) != 0:
             list_candidate = [key for key , value in dict_vote.items() if value == max(dict_vote.values()) ]
         else :
-            list_candidate = self.__get_live_player__()
+            list_candidate = self.__get_live_player_list__()
 
         return list_candidate
-
 
     def __random_candidate_from_maximum_candidate__(self):
         """
@@ -756,7 +729,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         return value : \n
             bool -> True(all vote), False(not yet) 
         """
-        
+
         # all werewolf vote 
         if  list_current_vote.count(-1) == (self.num_god+self.num_village):
             return True
@@ -1089,9 +1062,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
 
         return vars(self.list_players[player_number])
 
-    def __get_live_player__(self):
-        return [idx for idx , state in enumerate(self.__get_all_player_state__()) if state ]
-
+    
     def __get_all_player_state__(self)->list:
         """
         get the state of player number \n 
@@ -1101,6 +1072,12 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         """ 
 
         return [each.state for each in self.list_players]
+    
+    def __get_dialogue__(self,player_number,kind:int)->str:
+        try:
+            return self.__get_player_dialogue__(player_number=player_number)[self.round][kind]
+        except:
+            return ""
     
     def __get_player_dialogue__(self,player_number:int)->dict:
         """
