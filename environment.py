@@ -218,6 +218,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         killed_player = self.__get_killed_player_by_round__(round=self.round)
         if  killed_player != None:
             stage_return.append(([killed_player],"died",[],"狼殺的人"))
+            if self.round == 1:
+                stage_return.append(([killed_player],"dialogue",[],"遺言"))
 
         poison_player = self.__get_poisoned_player_by_round__(round=self.round)
     
@@ -252,6 +254,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         hunterKill_player = self.__get_hunterKill_player_by_round__(round=self.round)
         if  hunterKill_player != None:
             stage_return.append((hunterKill_player,"died",[],"獵人殺人"))
+            stage_return.append(([hunterKill_player],"dialogue",[],"遺言"))
         
         end_game_res = self.__get_end_game_res__()
         if end_game_res != None: 
@@ -329,6 +332,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         # live player
         list_live_player = self.__get_live_player_list__()
         stage_return.append(([hunter_number],"died",[],"投票結果"))
+        stage_return.append(([hunter_number],"dialogue",[],"遺言"))
         stage_return.append(([hunter_number],"vote_or_not",list_live_player,"獵人殺人"))
         
         return stage_return
@@ -339,6 +343,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
 
         if self.dict_player_number_to_roles[voted_player_number] != "hunter":
             stage_return.append(([voted_player_number],"died",[],"投票結果"))
+            stage_return.append(([voted_player_number],"dialogue",[],"遺言"))
         end_game_res = self.__get_end_game_res__()
 
         if end_game_res != None: 
