@@ -37,12 +37,13 @@ class WerewolfKillService(p_wkpg.werewolf_killServicer):
         stage_return , current_stage =  self.dict_game_env[room_name].stage()
         
         print(self.__current_state__(room_name=room_name))
-        print(f"nextStage() passing value: role: {room_name}, room_name: {stage_name}\n///")
+        print(f"nextStage() passing value: room_name: {room_name}, stage_name: {stage_name}\n///")
         stage = list()
         
         for each_stage in stage_return:
             
             if each_stage[1] == "end":
+                print("!!")
                 self.dict_game_env.pop(room_name)
             stage.append(p_wkp.userStage(user=each_stage[0],operation=each_stage[1],target=each_stage[2],description=each_stage[3]))
         
@@ -58,7 +59,7 @@ class WerewolfKillService(p_wkpg.werewolf_killServicer):
         operation = request.operation
         target = request.target
         description = request.chat
-        print(f"sendUserOperation() passing value: player_number: {player_number}, operation {operation}, target:{target}, description: {description}, stage_name: {stage_name}, room_name:{room_name}\n///")
+        print(f"sendUserOperation() passing value: player_number: {player_number}, operation: {operation}, target: {target}, description: {description}, stage_name: {stage_name}, room_name:{room_name}\n///")
 
 
         return p_wkp.result(result=self.dict_game_env[room_name].player_operation(
@@ -75,7 +76,7 @@ class WerewolfKillService(p_wkpg.werewolf_killServicer):
         room_name = request.room_name
         stage_name = request.stage_name
         print(self.__current_state__(room_name=room_name))
-        print(f"voteInfo() passing value: role: {room_name}, room_name {stage_name}\n///")
+        print(f"voteInfo() passing value: room_name: {room_name}, stage_name: {stage_name}\n///")
         list_player_voted = self.dict_game_env[room_name].check_player_voted_state()
 
         return p_wkp.playerState(state=list_player_voted)
