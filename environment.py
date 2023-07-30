@@ -116,15 +116,13 @@ class env():
         if c_stage == "witch" :
 
             use_idx = 0 if description == "poison" else 1
-            self.operation[c_stage][use_idx](player_number,target_player_number)
+            return self.operation[c_stage][use_idx](player_number,target_player_number)
             
         elif c_stage == "dialogue":
-            self.operation[c_stage](player_number=player_number,dialogue_content=description)
+            return self.operation[c_stage](player_number=player_number,dialogue_content=description)
         else:
-            self.operation[c_stage](player_number,target_player_number)
+            return self.operation[c_stage](player_number,target_player_number)
         
-
-        return True
 
     def check_player_voted_state(self)->list:
         return self.__update_current_player_voted__()
@@ -496,14 +494,17 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
 
     """ share Vote func """
 
-    def __player_vote__(self,player_number,want_to_vote_player_number):
+    def __player_vote__(self,player_number,want_to_vote_player_number)->bool:
         """
         people player want to vote for \n
         player_number -> 投票玩家編號 \n
         want_to_vote_player_number -> 被投票玩家編號 \n
         """
+        if want_to_vote_player_number not in self.__get_live_player_list__():
+            return False
 
         self.list_players[player_number].__vote__(want_to_vote_player_number)
+        return True 
 
     def __update_current_player_voted__(self)->list:
         """
@@ -662,7 +663,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
 
     """ seer func """
 
-    def __seer_check_identity__(self,player_number:int,target_player_number:int)->int:
+    def __seer_check_identity__(self,player_number:int,target_player_number:int)->bool:
         """
         get player is good or bad \n
         player_number -> who want to get identity \n
@@ -674,9 +675,9 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
 
         # you aren't seer, seer is died, the target player is died 
         if self.list_players[player_number].role != "seer" or not self.list_players[player_number].state or (not self.list_players[target_player_number].state and target_player_number != self.__get_current_killed_player__()):
-            return -1
+            return False
         self.__save_record__(player_number=target_player_number,kind=2)
-        return self.list_players[target_player_number].identity
+        return True
 
     def __setting_seer_target_list__(self,seer_number):
         list_live_player = self.__get_live_player_list__()
@@ -702,6 +703,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         # you aren't witch, witch didn't use,save_times ran out , witch is died
         if  self.list_players[player_number].role != "witch" or \
             target_player_number == -1 or \
+            self.__get_poisoned_player_by_round__(round=self.round) != None or \
             self.list_players[player_number].save_times <= 0 or \
             not self.list_players[player_number].state:
             
@@ -974,13 +976,14 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
 
         return self.list_players[player_number].dialogues
     
-    def __save_player_dialogue__(self,player_number:int,dialogue_content:str):
+    def __save_player_dialogue__(self,player_number:int,dialogue_content:str)->bool:
         """
         save dialogue of specified player \n
         format is dict
         """
         
         self.list_players[player_number].dialogues[self.round] = dialogue_content
+        return True
 
     def __get_current_vote_player_number__(self,player_number:int):
         """
