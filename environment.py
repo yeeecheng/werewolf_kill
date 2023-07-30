@@ -135,7 +135,7 @@ class env():
         """
 
         role_list = [ idx for idx ,value in enumerate(role_list) for _ in range(value)]
-        return role_list.count(0) == 1 and role_list.count(1) == 1 and role_list.count(6) <= 1 and  (len(role_list)-role_list.count(3)) >=  (role_list.count(3)+1)
+        return role_list.count(0) == 1 and role_list.count(1) == 1 and role_list.count(6) <= 1 and  (len(role_list)-role_list.count(3)) >  (role_list.count(3)+1)
 
     def get_game_env(self):
 
