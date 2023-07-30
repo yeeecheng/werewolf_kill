@@ -224,13 +224,13 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
                 stage_return.append(([killed_player],"dialogue",[],"遺言"))
             # if died player is hunter, he can use skill
             if self.dict_player_number_to_roles[killed_player] == "hunter":
-                stage_return.append((killed_player,"vote_or_not",list_live_player,"獵人殺人"))
+                stage_return.append(([killed_player],"vote_or_not",list_live_player,"獵人殺人"))
                 
         # get witch kill player number
         poison_player = self.__get_poisoned_player_by_round__(round=self.round)
     
         if  poison_player != None:
-            stage_return.append((poison_player,"died",[],"女巫毒的人"))
+            stage_return.append(([poison_player],"died",[],"女巫毒的人"))
         
         # check whether end game
         end_game_res = self.__get_end_game_res__()
@@ -250,7 +250,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         hunterKill_player = self.__get_hunterKill_player_by_round__(round=self.round)
         # if there is killed player, he can comment
         if  hunterKill_player != None:
-            stage_return.append((hunterKill_player,"died",[],"獵人的殺人"))
+            stage_return.append(([hunterKill_player],"died",[],"獵人的殺人"))
             stage_return.append(([hunterKill_player],"dialogue",[],"遺言"))
 
         # check whether end game
@@ -345,7 +345,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         else :
             hunterKill_player = self.__get_hunterKill_player_by_round__(round=self.round)
             if  hunterKill_player != None:
-                stage_return.append((hunterKill_player,"died",[],"獵人殺的人"))
+                stage_return.append(([hunterKill_player],"died",[],"獵人殺的人"))
                 stage_return.append(([hunterKill_player],"dialogue",[],"遺言"))
         
         end_game_res = self.__get_end_game_res__()
