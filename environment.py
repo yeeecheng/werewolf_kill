@@ -250,7 +250,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         hunterKill_player = self.__get_hunterKill_player_by_round__(round=self.round)
         # if there is killed player, he can comment
         if  hunterKill_player != None:
-            stage_return.append(([hunterKill_player],"died",[],"獵人的殺人"))
+            stage_return.append(([hunterKill_player],"died",[],"獵人殺的人"))
             stage_return.append(([hunterKill_player],"dialogue",[],"遺言"))
 
         # check whether end game
@@ -734,7 +734,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         # you aren't witch, witch is died, witch didn't use, kill_times ran out, the target player is died
         if  self.list_players[player_number].role != "witch" or \
             target_player_number == -1 or \
-            self.__get_poisoned_player_by_round__(round=self.round) != None or \
+            self.__get_saved_player_by_round__(round=self.round) != None or \
             self.list_players[player_number].kill_times <= 0 or \
             (not self.list_players[player_number].state and current_killed_player != player_number ) or \
             (not self.list_players[target_player_number].state and current_killed_player != target_player_number):
@@ -903,6 +903,18 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
                 return round , record[4]
         return None, None
     
+    def __get_saved_player_by_round__(self,round)->int:
+        """
+        get poison player in specified round \n
+        return value: \n
+        int -> player number
+        """
+
+        try:
+            return self.record[round-1][4]
+        except:
+            return None
+
     def __get_hunterKill_player_by_round__(self,round)->int:
         """
         get hunterKill player in specified round \n
