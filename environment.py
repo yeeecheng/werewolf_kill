@@ -649,9 +649,9 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         """
 
         list_live_player = self.__get_live_player_list__()
-        if player_number not in list_live_player or want_to_vote_player_number not in  list_live_player :
+        if player_number not in list_live_player or (want_to_vote_player_number != -1 and want_to_vote_player_number not in  list_live_player) :
             return False
-
+        
         self.list_players[player_number].__vote__(want_to_vote_player_number)
         return True 
 
@@ -863,13 +863,14 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         
         # you aren't witch, witch didn't use,save_times ran out , witch is died
         if  self.list_players[player_number].role != "witch" or \
-            target_player_number == -1 or \
             self.__get_poisoned_player_by_round__(round=self.round) != None or \
             self.list_players[player_number].save_times <= 0 or \
             not self.list_players[player_number].state:
-            
-            
             return False
+        
+        if target_player_number == -1 :
+            return True
+
         # save target
         self.__kill_or_save__(target_player_number=target_player_number,mode=1)
         
@@ -896,14 +897,18 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         current_killed_player = self.__get_current_killed_player__()
         # you aren't witch, witch is died, witch didn't use, kill_times ran out, the target player is died
         if  self.list_players[player_number].role != "witch" or \
-            target_player_number == -1 or \
             self.__get_saved_player_by_round__(round=self.round) != None or \
             self.list_players[player_number].kill_times <= 0 or \
-            (not self.list_players[player_number].state and current_killed_player != player_number ) or \
-            (not self.list_players[target_player_number].state and current_killed_player != target_player_number):
+            (not self.list_players[player_number].state and current_killed_player != player_number ) :
             
             return False
         
+        if target_player_number != -1 and (not self.list_players[target_player_number].state and current_killed_player != target_player_number):
+            return False
+
+        if target_player_number == -1 :
+            return True
+
         self.__kill_or_save__(target_player_number=target_player_number,mode=-1)
         self.__save_record__(player_number=target_player_number,kind=3)
         self.list_players[player_number].kill_times -= 1
@@ -942,10 +947,15 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
 
         # you aren't hunter, hunter didn't use, kill_times ran out, the target player is died
         if  self.list_players[player_number].role != "hunter" or \
-            target_player_number == -1 or \
-            self.list_players[player_number].kill_times <= 0 or \
-            not self.list_players[target_player_number].state :
+            self.list_players[player_number].kill_times <= 0 :
+            
             return False
+        
+        if target_player_number != -1 and not self.list_players[target_player_number].state :
+            return False
+        if target_player_number == -1 :
+            return True
+
         self.__kill_or_save__(target_player_number=target_player_number,mode=-1)
         self.__save_record__(player_number=target_player_number,kind=5)
         self.list_players[player_number].kill_times -= 1
