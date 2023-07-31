@@ -258,11 +258,12 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
                 if self.witch_has_poison(player_number=witch_number) :
                     if killed_player not in list_live_player:
                         list_live_player.insert(killed_player,killed_player)
+                        list_live_player.sort()
                     stage_return.append([[witch_number],"vote_or_not",list_live_player,"女巫毒人"])   
                     self.next_stage_return[self.current_stage+1].append([[self.__get_current_poisoned_player__],"died",[],"昨晚死了"])
         else:
             self.__next_stage__()
-            return self.all_stage_func[self.current_stage](stage_return=stage_return)
+            return self.all_stage_func[self.current_stage]()
         
         if len(stage_return) == 0:
             stage_return.append([[witch_number],"vote_or_not",[],"女巫救人"])
@@ -355,6 +356,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
                 died_player_number = stage[0][0]
                 stage[3] = stage[3](player_number=died_player_number,kind=-1)
             self.__choose_comment__()
+            self.next_stage_return[self.current_stage]= list()
             # reset list_has_commented_player_number
             self.list_has_commented_player_number = list()
 
