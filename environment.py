@@ -61,8 +61,8 @@ class env():
         self.current_comment_player_number = 0
         self.end_comment_player_number = self.current_comment_player_number - 1
         self.number_comment = 0
-
-
+        # voted target
+        self.list_vote_target = list()
         
 
     """  Server Use func """
@@ -201,7 +201,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         # reset previous vote
         self.__reset_vote__()
         stage_return.append([live_werewolf,"vote",list_live_player,"狼人投票殺人"])
-        
+        self.list_vote_target = list_live_player
         return stage_return 
 
     def __stage_seer__(self)->list:
@@ -298,7 +298,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
                         if self.dict_player_number_to_roles[died_player_number] == "hunter":
                             new_stage_return.append(([died_player_number],"vote_or_not",list_live_player,"獵人殺人"))
                             self.next_stage_return[self.current_stage+1].append([[self.__get_current_hunterKill_player__],"died",[],"被獵人帶走"])
-                        else :
+                        elif self.dict_player_number_to_roles[died_player_number] != "hunter" and self.round == 1:
                             self.next_stage_return[self.current_stage+1] = list()
                             self.next_stage_return[self.current_stage+2].append([[died_player_number],"chat",[],self.__get_dialogue__])
                     stage[0][0] = died_player_number
@@ -396,6 +396,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         # reset previous vote
         self.__reset_vote__()
         stage_return.append([list_live_player,"vote_or_not",list_live_player,"投票階段"])
+        self.list_vote_target = list_live_player
         self.next_stage_return[self.current_stage+1].append([[self.__get_current_voted_player__],"died",[],"被票出去了"])
 
         return stage_return
@@ -421,6 +422,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         # reset previous vote
         self.__reset_vote__()
         stage_return.append([list_live_player,"vote_or_not",list_candidate,"投票階段"])
+        self.list_vote_target = list_candidate
         self.next_stage_return[self.current_stage+1].append(([self.__get_current_voted_player__],"died",[],"被票出去了"))
         
         return stage_return
@@ -649,7 +651,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         """
 
         list_live_player = self.__get_live_player_list__()
-        if player_number not in list_live_player or (want_to_vote_player_number != -1 and want_to_vote_player_number not in  list_live_player) :
+        
+        if player_number not in list_live_player or (want_to_vote_player_number != -1 and want_to_vote_player_number not in  self.list_vote_target) :
             return False
         
         self.list_players[player_number].__vote__(want_to_vote_player_number)
@@ -745,7 +748,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         list_current_vote = self.__update_current_player_voted__()
         list_candidate = self.__find_maximum_voted_candidate__(list_current_vote)
         # multiple candidate or not all werewolf vote
-        if len(list_candidate) != 1 or not self.__check_player_vote_state__(list_current_vote):
+        # or not self.__check_player_vote_state__(list_current_vote)
+        if len(list_candidate) != 1 :
             return False
         
         self.__save_record__(player_number=list_candidate[0],kind=1)
