@@ -139,11 +139,9 @@ class env():
             
             return self.operation[c_stage](player_number=player_number,dialogue_content=description)
         
-        elif c_stage in ["werewolf","seer","vote1","vote2"]:
-            # check whether is werewolf
-            if c_stage == "werewolf" and self.list_players[player_number].role  != "werewolf":
-                return False
-                
+        elif c_stage in ["werewolf","vote1","vote2"]:
+            return self.operation[c_stage](player_number,target_player_number,c_stage)
+        elif c_stage in ["seer"]:
             return self.operation[c_stage](player_number,target_player_number)
 
     def check_player_voted_state(self)->list:
@@ -643,7 +641,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
 
     """ share Vote func """
 
-    def __player_vote__(self,player_number,want_to_vote_player_number)->bool:
+    def __player_vote__(self,player_number,want_to_vote_player_number,mode:str)->bool:
         """
         people player want to vote for \n
         player_number -> 投票玩家編號 \n
@@ -651,9 +649,20 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         """
 
         list_live_player = self.__get_live_player_list__()
-        
+        # player isn't live, target not in list_target         
         if player_number not in list_live_player or (want_to_vote_player_number != -1 and want_to_vote_player_number not in  self.list_vote_target) :
             return False
+        
+        if mode in ["vote2"]:
+            # player in list_target
+            if player_number in self.list_vote_target :
+                return False
+        elif mode in ["werewolf"]:
+
+            # check whether is werewolf
+            if self.list_players[player_number].role  != "werewolf":
+                return False
+
         
         self.list_players[player_number].__vote__(want_to_vote_player_number)
         return True 
