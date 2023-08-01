@@ -895,7 +895,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         if target_player_number == -1 :
             return True
 
-        if target_player_number not in self.list_vote_target:
+        if target_player_number != self.__get_current_killed_player__():
             return False
         
         if  saved_player_number != None :
