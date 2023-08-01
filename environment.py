@@ -134,6 +134,7 @@ class env():
                 if player_number != self.__get_current_hunterKill_player__():
                     return False
             else:
+                
                 if player_number != self.__get_current_hunterKill_player__() and player_number != self.__get_current_voted_player__():
                     return False
             
@@ -153,7 +154,7 @@ class env():
         """
 
         role_list = [ idx for idx ,value in enumerate(role_list) for _ in range(value)]
-        return role_list.count(0) == 1 and role_list.count(1) == 1 and role_list.count(6) <= 1 and  (len(role_list)-role_list.count(3)) >  (role_list.count(3)+1)
+        return role_list.count(0) == 1 and role_list.count(1) == 1 and role_list.count(4) <= 1 and  (len(role_list)-role_list.count(3)) >  (role_list.count(3)+1)
 
     def get_game_env(self):
 
@@ -224,6 +225,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         # if seer is live 
         if self.list_players[seer_number].state or self.__get_current_killed_player__() == seer_number:
             stage_return.append(([seer_number],"vote",seer_target_list,"預言家查身分"))
+            self.list_vote_target = seer_target_list
             self.next_stage_return[self.current_stage+1].append([[seer_number],"role_info",[self.__get_current_seer_player__],""])
             return stage_return
         # seer is died, return empty list
@@ -239,7 +241,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         if len(stage_return) != 0:
             seed_player_number = stage_return[0][2][0]()
             stage_return[0][2][0] = seed_player_number
-            stage_return[0][3] = "是好人" if self.list_players[seed_player_number].identity else "是壞人"
+            # stage_return[0][3] = "是好人" if self.list_players[seed_player_number].identity else "是壞人"
+            stage_return[0][3] = f"{self.list_players[seed_player_number].identity}"
 
         witch_number = self.__get_role_number__("witch")
         
@@ -257,7 +260,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
                     if killed_player not in list_live_player:
                         list_live_player.insert(killed_player,killed_player)
                         list_live_player.sort()
-                    stage_return.append([[witch_number],"vote_or_not",list_live_player,"女巫毒人"])   
+                    stage_return.append([[witch_number],"vote_or_not",list_live_player,"女巫毒人"])
+                    self.list_vote_target = list_live_player   
                     self.next_stage_return[self.current_stage+1].append([[self.__get_current_poisoned_player__],"died",[],"昨晚死了"])
         else:
             self.__next_stage__()
@@ -295,6 +299,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
                         # if died player is hunter, he can use skill
                         if self.dict_player_number_to_roles[died_player_number] == "hunter":
                             new_stage_return.append(([died_player_number],"vote_or_not",list_live_player,"獵人殺人"))
+                            self.list_vote_target = list_live_player   
                             self.next_stage_return[self.current_stage+1].append([[self.__get_current_hunterKill_player__],"died",[],"被獵人帶走"])
                         elif self.dict_player_number_to_roles[died_player_number] != "hunter" and self.round == 1:
                             self.next_stage_return[self.current_stage+1] = list()
@@ -445,6 +450,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
             return self.all_stage_func[self.current_stage]()
 
         stage_return.append([[voted_player_number],"vote_or_not",list_live_player,"獵人殺人"])
+        self.list_vote_target = list_live_player   
         self.next_stage_return[self.current_stage+1].append([[voted_player_number],"chat",[],self.__get_dialogue__])
         self.next_stage_return[self.current_stage+1].append([[self.__get_current_hunterKill_player__],"died",[],"被獵人帶走"])
 
@@ -614,7 +620,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
     def __get_live_player_list__(self)->list:
         return [number for number , player_state in enumerate(self.__get_all_player_state__()) if player_state == 1]
 
-    def __check_end_game__(self)->tuple[bool,int]:
+    def __check_end_game__(self)->tuple[bool,str]:
         """
         check whether end game \n
         return value: \n
@@ -623,10 +629,14 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         """
 
         
-        if self.num_werewolf == (self.num_god + self.num_village) or self.num_god <= 0 or self.num_village <= 0 :
-            return True, 0
+        if self.num_werewolf == (self.num_god + self.num_village) :
+            return True , "遊戲結束 狼人過半 壞人獲勝"
+        elif self.num_god <= 0 :
+            return True , "遊戲結束 神職全死 壞人獲勝"
+        elif self.num_village <= 0 :
+            return True , "遊戲結束 村民全死 壞人獲勝"
         elif self.num_werewolf <= 0:
-            return True, 1
+            return True , "好人陣營獲勝"
         
         return False, None
     
@@ -634,7 +644,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
 
         final_res , who_win = self.__check_end_game__()
         if final_res:
-            return ([], "end", [], "好人陣營獲勝" if who_win else "壞人陣營獲勝")
+            return ([], "end", [], who_win)
         return None
     
 
@@ -873,16 +883,26 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
             True -> success saving \n
             False -> failed saving
         """
+        saved_player_number = self.__get_current_saved_player__()
         
         # you aren't witch, witch didn't use,save_times ran out , witch is died
         if  self.list_players[player_number].role != "witch" or \
             self.__get_poisoned_player_by_round__(round=self.round) != None or \
-            self.list_players[player_number].save_times <= 0 or \
+            (saved_player_number == None and self.list_players[player_number].save_times <= 0) or \
             not self.list_players[player_number].state:
             return False
         
         if target_player_number == -1 :
             return True
+
+        if target_player_number not in self.list_vote_target:
+            return False
+        
+        if  saved_player_number != None :
+            self.__kill_or_save__(target_player_number=saved_player_number,mode=-1)
+            self.record[self.round-1].pop(4)
+            self.__save_record__(player_number=saved_player_number,kind=0)
+            self.list_players[player_number].save_times += 1
 
         # save target
         self.__kill_or_save__(target_player_number=target_player_number,mode=1)
@@ -906,22 +926,30 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
             True -> success poisoning  \n
             False -> failed poisoning
         """
-
+        poisoned_player_number = self.__get_current_poisoned_player__()
         current_killed_player = self.__get_current_killed_player__()
         # you aren't witch, witch is died, witch didn't use, kill_times ran out, the target player is died
         if  self.list_players[player_number].role != "witch" or \
             self.__get_saved_player_by_round__(round=self.round) != None or \
-            self.list_players[player_number].kill_times <= 0 or \
+            (poisoned_player_number == None and  self.list_players[player_number].kill_times <= 0 )or \
             (not self.list_players[player_number].state and current_killed_player != player_number ) :
             
             return False
         
-        if target_player_number != -1 and (not self.list_players[target_player_number].state and current_killed_player != target_player_number):
-            return False
-
         if target_player_number == -1 :
             return True
 
+        if target_player_number not in self.list_vote_target:
+            return False
+
+        if target_player_number != -1 and (not self.list_players[target_player_number].state and current_killed_player != target_player_number):
+            return False
+
+        if  poisoned_player_number != None :
+            self.__kill_or_save__(target_player_number=poisoned_player_number,mode=1)
+            self.record[self.round-1].pop(3)
+            self.list_players[player_number].kill_times += 1
+        
         self.__kill_or_save__(target_player_number=target_player_number,mode=-1)
         self.__save_record__(player_number=target_player_number,kind=3)
         self.list_players[player_number].kill_times -= 1
@@ -958,16 +986,26 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
             False -> failed killing
         """
 
+        hunterKill_player_number = self.__get_current_hunterKill_player__()
         # you aren't hunter, hunter didn't use, kill_times ran out, the target player is died
         if  self.list_players[player_number].role != "hunter" or \
-            self.list_players[player_number].kill_times <= 0 :
+            (hunterKill_player_number == None and self.list_players[player_number].kill_times <= 0 ):
             
             return False
         
-        if target_player_number != -1 and not self.list_players[target_player_number].state :
-            return False
         if target_player_number == -1 :
             return True
+        
+        if target_player_number not in self.list_vote_target:
+            return False
+
+        if target_player_number != -1 and not self.list_players[target_player_number].state :
+            return False
+
+        if hunterKill_player_number != None :
+            self.__kill_or_save__(target_player_number=hunterKill_player_number,mode=1)
+            self.record[self.round-1].pop(5)
+            self.list_players[player_number].kill_times += 1
 
         self.__kill_or_save__(target_player_number=target_player_number,mode=-1)
         self.__save_record__(player_number=target_player_number,kind=5)
@@ -1121,7 +1159,16 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
             return self.record[round-1][4]
         except:
             return None
+    
+    def __get_current_saved_player__(self)->int:
+        """
+        get save player in specified round \n
+        return value: \n
+        int -> player number
+        """
 
+        return self.__get_saved_player_by_round__(self.round)
+    
     def __get_hunterKill_player_by_round__(self,round)->int:
         """
         get hunterKill player in specified round \n
@@ -1200,8 +1247,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         """
 
         # whether died in current round
-        
-        if (player_number != self.__get_current_killed_player__() and player_number != self.__get_current_voted_player__()) and self.list_players[player_number].state == 0 :
+        if (player_number != self.__get_current_hunterKill_player__() and player_number != self.__get_current_killed_player__() and player_number != self.__get_current_voted_player__()) and self.list_players[player_number].state == 0 :
             return False
         # print("!!",player_number,dialogue_content)
         try:
@@ -1334,12 +1380,16 @@ if __name__ == "__main__":
     env.player_operation(player_number=6,operation="dialogue",target_player_number=4,description="yoyo",current_stage="1-1-hunter2")
     # print(env.__get_player_dialogue__(player_number=6))
     env.player_operation(player_number=6,operation="vote_or_not",target_player_number=4,description="",current_stage="1-1-hunter2")
+    
+    
     stage , stage_name =env.stage()
     print(stage,stage_name)
+    print(env.player_operation(player_number=4,operation="dialogue",target_player_number=4,description="yoyo",current_stage="1-1-check_end3"))
+    print("##")
+    
     print(env.__get_all_player_state__())
     stage , stage_name =env.stage()
     print(stage,stage_name)
-    print("##")
     print(env.player_operation(player_number=5,operation="vote",target_player_number=0,description="",current_stage="2-0-werewolf"))
     print(env.__get_all_player_state__())
     # 預查
@@ -1372,8 +1422,8 @@ if __name__ == "__main__":
     # 2 投
     stage , stage_name =env.stage()
     print(stage,stage_name)
-    env.player_operation(player_number=5,operation="vote",target_player_number=3,description="",current_stage="2-1-vote2")
-
+    env.player_operation(player_number=1,operation="vote",target_player_number=3,description="",current_stage="2-1-vote2")
+    print("////")
     stage , stage_name =env.stage()
     print(stage,stage_name)
 
@@ -1382,7 +1432,7 @@ if __name__ == "__main__":
     stage , stage_name =env.stage()
     print(stage,stage_name)
 
-    print(env.player_operation(player_number=5,operation="vote",target_player_number=1,description="",current_stage="1-0-werewolf"))
+    print(env.player_operation(player_number=5,operation="vote",target_player_number=1,description="",current_stage="3-0-werewolf"))
 
     stage , stage_name =env.stage()
     print(stage,stage_name)
@@ -1390,7 +1440,11 @@ if __name__ == "__main__":
     stage , stage_name =env.stage()
     print(stage,stage_name)
     
-    env.player_operation(player_number=1,operation="vote_or_not",target_player_number=5,description="poison",current_stage="1-0-witch")
+    print(env.player_operation(player_number=1,operation="vote_or_not",target_player_number=5,description="poison",current_stage="3-0-witch"))
+    print(env.player_operation(player_number=1,operation="vote_or_not",target_player_number=0,description="poison",current_stage="3-0-witch"))
+    print(env.player_operation(player_number=1,operation="vote_or_not",target_player_number=1,description="poison",current_stage="3-0-witch"))
 
     stage , stage_name =env.stage()
     print(stage,stage_name)
+
+    print(env.__get_all_player_state__())
