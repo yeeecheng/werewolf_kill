@@ -110,7 +110,7 @@ class env():
 
     def player_operation(self,player_number:int,operation:str, target_player_number:int, description:str,current_stage:str)->bool:
         
-        print(current_stage,self.__get_current_stage__())
+        
         if current_stage != self.__get_current_stage__() :
             return False
         c_stage = current_stage.split("-")[2]
@@ -331,7 +331,6 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
 
         if len(stage_return) == 0: 
             stage_return.append([[],"other",[],"昨晚是平安夜"])
-        print(self.next_stage_return[self.current_stage+1])
         return stage_return
             
     def __stage_check_end2__(self)->list:
@@ -1268,7 +1267,6 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         # whether died in current round
         if (player_number != self.__get_current_hunterKill_player__() and player_number != self.__get_current_killed_player__() and player_number != self.__get_current_voted_player__()) and self.list_players[player_number].state == 0 :
             return False
-        # print("!!",player_number,dialogue_content)
         try:
             self.list_players[player_number].dialogues[self.round].append(dialogue_content)
         except:
