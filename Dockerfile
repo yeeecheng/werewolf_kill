@@ -13,4 +13,4 @@ RUN apt-get update -y
 RUN pip install -r ./requirement.txt
 RUN chmod +x ./server.py
 
-CMD ["python" , "-u" ,"./server.py"]
+CMD ["python" , "-u" ,"./server.py","--random","True"]
