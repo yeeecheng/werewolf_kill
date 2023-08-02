@@ -3,6 +3,8 @@ import random
 import json
 from role import role
 
+
+
 class env():
 
     """
@@ -13,7 +15,7 @@ class env():
     4 : hunter
     """
 
-    def __init__(self,roles :list, state = 0, round = 0):
+    def __init__(self,roles :list, state = 0, round = 0,random_assigned = False):
         
         # env's state, night(0) and day(1)
         self.state = state
@@ -33,6 +35,8 @@ class env():
         self.roles_list = [ idx for idx ,value in enumerate(roles) for _ in range(value)]
         # number of player
         self.num_player = len(self.roles_list)
+
+        self.random_assigned = random_assigned
 
         self.current_stage = 0
         self.all_stage = ["werewolf","seer","witch","check_end1","check_end2","dialogue","vote1","vote2","hunter2","check_end3"]
@@ -522,9 +526,11 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
         return value : \n
             list -> 分配後的角色
         """
-        
-        list_assigned_roles = random.sample(self.roles_list , self.num_player)
-        # list_assigned_roles = [0,1,2,2,3,3] 
+        if self.random_assigned:
+            list_assigned_roles = random.sample(self.roles_list , self.num_player)
+        else:
+            list_assigned_roles = self.roles_list
+
         list_players = [0]*self.num_player
         # create roles 
         for idx in range(self.num_player):
