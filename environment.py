@@ -523,8 +523,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(play
             list -> 分配後的角色
         """
         
-        # list_assigned_roles = random.sample(self.roles , self.num_player)
-        list_assigned_roles = [0,1,2,2,3,3] 
+        list_assigned_roles = random.sample(self.roles_list , self.num_player)
+        # list_assigned_roles = [0,1,2,2,3,3] 
         list_players = [0]*self.num_player
         # create roles 
         for idx in range(self.num_player):
@@ -1310,7 +1310,7 @@ if __name__ == "__main__":
     
     
     # 分配角色
-    env = env(roles=[1,1,2,2])
+    env = env(roles=[1,1,2,3,1])
     role_list = env.start_game()
     print(role_list)
     
