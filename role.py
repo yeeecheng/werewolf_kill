@@ -4,8 +4,10 @@ class role():
         
         for key , value in init_data.items():
             setattr(self ,key , value)
-        # dialogues
+        # live dialogues
         self.dialogues = dict()
+        # died dialogues
+        self.died_dialogues = list()
         #　live(1) or dead(0) 
         self.state =  1
         # vote player number , -1 : not yet vote
