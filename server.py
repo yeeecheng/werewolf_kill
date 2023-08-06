@@ -6,15 +6,14 @@ import grpc
 import protobufs.werewolf_kill_pb2 as p_wkp
 import protobufs.werewolf_kill_pb2_grpc as p_wkpg
 
-from environment  import env
+from envirement  import env
 
 
 class WerewolfKillService(p_wkpg.werewolf_killServicer):
 
-    def __init__(self,opt):
+    def __init__(self):
         
         self.dict_game_env = dict()
-        self.random = opt.random
 
     def checkRoleList(self,request,context):
         print("checkRoleList: No need room_name")
@@ -26,7 +25,7 @@ class WerewolfKillService(p_wkpg.werewolf_killServicer):
     def startGame(self,request,context):
         
         room_name = request.room_name
-        self.dict_game_env[room_name] = env(roles=request.role,random_assigned=self.random)
+        self.dict_game_env[room_name] = env(role_list=request.role)
         role_list = self.dict_game_env[room_name].start_game()
         
         print(self.__current_state__(room_name=room_name))
@@ -65,9 +64,9 @@ class WerewolfKillService(p_wkpg.werewolf_killServicer):
 
 
         return p_wkp.result(result=self.dict_game_env[room_name].player_operation(
-                player_number=player_number,
+                id=player_number,
                 operation=operation,
-                target_player_number=target,
+                target_id=target,
                 description=description,
                 current_stage=stage_name))
         
@@ -88,18 +87,12 @@ class WerewolfKillService(p_wkpg.werewolf_killServicer):
 
         return f"\nroom {room_name}{info}"
 
-def parse_opt():
-    
-    parser =  argparse.ArgumentParser()
-    parser.add_argument("--random",type=bool,default=False)
 
-    return parser.parse_args()
-
-def serve(opt):
+def serve():
     
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     p_wkpg.add_werewolf_killServicer_to_server(
-        WerewolfKillService(opt), server
+        WerewolfKillService(), server
     )  
     
     server.add_insecure_port('[::]:50051')
@@ -109,5 +102,4 @@ def serve(opt):
 
 if __name__ == '__main__':
     logging.basicConfig()
-    opt = parse_opt()
-    serve(opt)
+    serve()
