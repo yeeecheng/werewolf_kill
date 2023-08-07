@@ -543,7 +543,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         # 目前玩家要發言
         ret.append([[self.id[self.current_comment_id_idx]],"dialogue",[],"玩家發言"])
         # 下個stage 顯示的發言
-        self.list_chat_id.append([get_dialogue_func,self.id[self.current_comment_id_idx]])
+        if self.list_players[self.id[self.current_comment_id_idx]].state == 1:
+            self.list_chat_id.append([get_dialogue_func,self.id[self.current_comment_id_idx]])
         self.next_stage = self.__stage_dialogue__
 
         if self.current_comment_id_idx == ((self.first_comment_id_idx-1)+len(self.id)) % len(self.id):  
@@ -757,7 +758,7 @@ if __name__ == "__main__":
     # 女巫
     op  , stage = env.stage()
     print(op,stage)
-    print(env.player_operation(id=1,operation="vote_or_not",target_id=4,description="save",current_stage=stage))
+    # print(env.player_operation(id=1,operation="vote_or_not",target_id=4,description="save",current_stage=stage))
     # print(env.player_operation(id=1,operation="vote",target_id=-1,description="",current_stage=stage))
     # print(env.player_operation(id=1,operation="vote_or_not",target_id=2,description="poison",current_stage=stage))
 
