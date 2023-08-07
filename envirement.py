@@ -18,7 +18,7 @@ class env():
         self.list_players = [0 for _ in range(self.num_player)]
 
         self.dict_player_number_to_roles = dict()
-        self.dict_role_to_player_nunmber = dict()
+        self.dict_role_to_id = dict()
         self.num_village = 0 
         self.num_werewolf = 0
         self.num_god = 0
@@ -41,7 +41,6 @@ class env():
             "vote2_dialogue" : self.__save_dialogue__,
             "vote2" : self.__player_vote__,
             "hunter" : [self.__hunter_kill__,self.__save_dialogue__],
-            "died" : self.__save_dialogue__,
             "check" : self.__save_dialogue__
         }
         # game's executing environment
@@ -61,7 +60,7 @@ class env():
         self.need_vote2 = False
         # need to go werewolf dialogue stage
         self.need_werewolf_dialogue = True
-        # first commemt id 
+        # first comment id 
         self.first_comment_id_idx = None
         self.current_comment_id_idx = None
         # check end game 
@@ -77,9 +76,9 @@ class env():
         
         self.dict_player_number_to_roles = {idx:self.dict_role_setting[str(each)]["role"] for idx,each in enumerate(self.role_list)}
         for key, value in self.dict_player_number_to_roles.items():
-            if value not in self.dict_role_to_player_nunmber.keys():
-                self.dict_role_to_player_nunmber[value] = list()
-            self.dict_role_to_player_nunmber[value].append(key)
+            if value not in self.dict_role_to_id.keys():
+                self.dict_role_to_id[value] = list()
+            self.dict_role_to_id[value].append(key)
         
         return self.role_list
 
@@ -108,7 +107,7 @@ Stage: {self.__get_current_stage__()}
 Game Setting: {[f"player {key}: {value}" for key, value in self.dict_player_number_to_roles.items()]}
 god number: {self.num_god}, village number: {self.num_village}, werewolf number: {self.num_werewolf}
 all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self.__get_all_player_state__()
-      )]}
+        )]}
         """
 
     def player_operation(self,id:int,operation:str, target_id:int, description:str,current_stage:str)->bool:
@@ -119,7 +118,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         c_stage = current_stage.split("-")[2]
 
         # 沒寫存狼人發言
-        if c_stage in ["werewolf_dialogue","dialogue","vote2_dialogue","died"]:
+        if c_stage in ["werewolf_dialogue","dialogue","vote2_dialogue"]:
             return self.dict_operations[c_stage](id=id,content=description,mode=c_stage)
         elif c_stage in ["witch"]:
             use_idx = 0 if description == "poison" else 1
@@ -162,7 +161,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         self.current_comment_id_idx = None
         
         ret.append([[],"other",[],"天黑請閉眼"])
-        self.current_stage_name = "night"
+        self.current_stage_name = "check"
         self.next_stage = self.__stage_dialogue__
         return ret
     
@@ -189,9 +188,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
                     self.current_comment_id_idx = None
                     self.next_stage = self.__stage_dialogue__
                     ret.append([[],"other",[],"第一輪平票/沒人投票"])
-                
             else :
-
                 self.check_end = True
         
         for kind , id in  self.list_died_id:
@@ -249,7 +246,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         if description in ["昨晚是平安夜","沒有人被投出去"]:
             return [[], "other", [], description]
         elif description != None:
-            return [[], "other", [], description]
+            return [[], "end", [], description]
         return None
     
     def __killed_by_werewolf__(self,id:int)->list:
@@ -258,8 +255,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         
         if self.role_list[id] == 4:
             self.id = [id]
-            self.tartet = self.__get_target_list__(vote=True)
-            self.list_dialogue_id.append([self.id,"vote_or_not",self.tartet,"獵人殺人"])
+            self.target_id = self.__get_target_list__(vote=True)
+            self.list_dialogue_id.append([self.id,"vote_or_not",self.target_id,"獵人殺人"])
             self.current_stage_name = "hunter"
 
         return [[id],"died",[],"昨晚死了"]
@@ -280,8 +277,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         self.list_dialogue_id.append([[id],"dialogue",[],"發遺言"])
         if self.role_list[id] == 4:
             self.id = [id]
-            self.tartet = self.__get_target_list__(vote=True)
-            self.list_dialogue_id.append([self.id,"vote_or_not",self.tartet,"獵人殺人"])
+            self.target_id = self.__get_target_list__(vote=True)
+            self.list_dialogue_id.append([self.id,"vote_or_not",self.target_id,"獵人殺人"])
             self.current_stage_name = "hunter"
         
         return [[id],"died",[],"被票出去了"]
@@ -295,7 +292,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
                     if id != None :
                         live_list.append(id)
             role_id_list = list()
-            for id in self.dict_role_to_player_nunmber[role]:
+            for id in self.dict_role_to_id[role]:
                 if id in live_list:
                     role_id_list.append(id)
             return role_id_list
@@ -353,7 +350,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
             ret.append([self.id,"vote",self.target_id,"預言家查身分"])
             self.next_stage_use[self.__stage_witch__] = [self.id,"role_info",[self.__get_current_seer_id__],""]
         else :
-            ret.append([[],"other",[],"過場"])
+            ret.append([self.id,"vote",[],"預言家查身分"])
 
         self.next_stage = self.__stage_witch__
         self.current_stage_name = "seer"
@@ -476,12 +473,12 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         if id not in self.id or target_id not in copy_target_id:
             return False
         
-        hutnerKill_id  =self.__get_current_hunterKilled_id__()
+        hunterKill_id  =self.__get_current_hunterKilled_id__()
         # 已經有了的話
-        if  hutnerKill_id != None:
-            self.__kill_or_save__(target_id=hutnerKill_id,mode=1)
-            self.list_died_id.remove([self.__killed_by_hunter__,hutnerKill_id])
-            self.__clear_current_game_record__(kind="hutnerKill_id")
+        if  hunterKill_id != None:
+            self.__kill_or_save__(target_id=hunterKill_id,mode=1)
+            self.list_died_id.remove([self.__killed_by_hunter__,hunterKill_id])
+            self.__clear_current_game_record__(kind="hunterKilled")
             self.list_players[id].kill_times += 1
         if target_id == -1 :
             return True
@@ -510,7 +507,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
                 ret.append([self.id,"vote_or_not",self.target_id,"女巫毒人"])
             
         else :
-            ret.append([[],"other",[],"過場"])
+            ret.append([self.id,"vote_or_not",[],"女巫救人"])
+            ret.append([self.id,"vote_or_not",[],"女巫毒人"])
         
         self.next_stage = self.__stage_dialogue__
         self.current_stage_name = "witch"
@@ -521,6 +519,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
     def __stage_dialogue__(self,ret:list)->list:
         self.id = self.__get_live_id_list__()
         self.current_stage_name = "dialogue"
+        operation_name = "dialogue"
+        target = [] 
         get_dialogue_func = self.__get_current_live_dialogue__
         next_stage = self.__stage_vote__
         
@@ -529,6 +529,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
             self.current_stage_name = "werewolf_dialogue"
             get_dialogue_func = self.__get_current_werewolf_dialogue__
             next_stage = self.__stage_werewolf__
+            operation_name = "werewolf_dialogue"
+            target = self.id
 
         if self.need_vote2:
             self.__setting_vote2_id_and_target_id__()
@@ -541,7 +543,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
             self.current_comment_id_idx = self.first_comment_id_idx
 
         # 目前玩家要發言
-        ret.append([[self.id[self.current_comment_id_idx]],"dialogue",[],"玩家發言"])
+        ret.append([[self.id[self.current_comment_id_idx]],operation_name,target,"玩家發言"])
         # 下個stage 顯示的發言
         if self.list_players[self.id[self.current_comment_id_idx]].state == 1:
             self.list_chat_id.append([get_dialogue_func,self.id[self.current_comment_id_idx]])
