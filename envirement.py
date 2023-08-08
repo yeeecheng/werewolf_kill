@@ -183,7 +183,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         # reset list
         self.list_chat_id.clear()
         # 接下來要進入 狼發言 , 
-        if self.next_stage == self.__night__  and self.first_comment_id_idx != None and self.first_comment_id_idx == self.current_comment_id_idx and self.state == 1:
+        if self.next_stage == self.__night__  and self.first_comment_id_idx != None and self.current_comment_id_idx == ((self.first_comment_id_idx-1)+len(self.id)) % len(self.id) and self.state == 1:
             if not self.__get_vote_res__():
                 # vote1 
                 if not self.need_vote2: 
@@ -565,7 +565,6 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         if self.current_comment_id_idx == ((self.first_comment_id_idx-1)+len(self.id)) % len(self.id):  
             self.next_stage = next_stage
 
-        
         return ret
     # v
     def __stage_vote__(self,ret:list)->list:
@@ -599,7 +598,6 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         
         # 投票人數 
         num_vote = sum([len(val) for val in dict_vote_res.values()])
-        print(num_vote)
         # 都沒投
         if num_vote == 0:
             self.candidate_id = list_live_id
@@ -692,7 +690,6 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         if id not in self.id  :
             return False
         if mode == "dialogue":
-            print(self.id,self.current_comment_id_idx)
             if id != self.id[self.current_comment_id_idx]:
                 return False
             if self.round not in self.list_players[id].dialogues.keys():
@@ -789,7 +786,7 @@ if __name__ == "__main__":
     op  , stage = env.stage()
     print(op,stage)
     print("/////")
-    # print(env.player_operation(id=2,operation="dialogue",target_id=-1,description="qqqqqq",current_stage=stage))
+    print(env.player_operation(id=4,operation="dialogue",target_id=-1,description="qqqqqq",current_stage=stage))
 
     # op  , stage = env.stage()
     # print(op,stage)
