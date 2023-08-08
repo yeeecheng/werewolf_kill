@@ -551,8 +551,11 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         if self.first_comment_id_idx == None:
             self.first_comment_id_idx = random.randint(a=0,b=(len(self.id)-1))
             self.current_comment_id_idx = self.first_comment_id_idx
+        else :
+            self.current_comment_id_idx = (self.current_comment_id_idx + 1) % len(self.id)
 
         # 目前玩家要發言
+        
         ret.append([[self.id[self.current_comment_id_idx]],operation_name,[],"玩家發言"])
         # 下個stage 顯示的發言
         if self.list_players[self.id[self.current_comment_id_idx]].state == 1:
@@ -562,7 +565,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         if self.current_comment_id_idx == ((self.first_comment_id_idx-1)+len(self.id)) % len(self.id):  
             self.next_stage = next_stage
 
-        self.current_comment_id_idx = (self.current_comment_id_idx + 1) % len(self.id)
+        
         return ret
     # v
     def __stage_vote__(self,ret:list)->list:
@@ -685,7 +688,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         return self.__get_game_record_by_round__(round=self.round,kind="voted")
 
     def __save_dialogue__(self,id:int,content:str,mode:str)->bool:
-        
+
         if id not in self.id  :
             return False
         if mode == "dialogue":
