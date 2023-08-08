@@ -175,8 +175,11 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
     def __priority_info__(self,ret:list)->list:
         
         for get_dialogue , id in self.list_chat_id:
+            target = []
+            if self.need_werewolf_dialogue :
+                target = self.id
             # 前面說話資訊
-            ret.append([[id],"chat",[],get_dialogue(id=id)])
+            ret.append([[id],"chat",target,get_dialogue(id=id)])
         # reset list
         self.list_chat_id.clear()
         # 接下來要進入 狼發言 , 
@@ -330,6 +333,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         
         self.id = self.__get_role_id_list__(role="werewolf",night_mode=True)
         self.target_id = self.__get_target_list__(night_mode=True,vote=True)
+        self.need_werewolf_dialogue = False
         self.__reset_vote__()
         ret.append([self.id,"vote",self.target_id,"狼人投票殺人"])
         self.next_stage = self.__stage_seer__
@@ -529,7 +533,6 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         self.id = self.__get_live_id_list__()
         self.current_stage_name = "dialogue"
         operation_name = "dialogue"
-        target = [] 
         get_dialogue_func = self.__get_current_live_dialogue__
         next_stage = self.__stage_vote__
         
@@ -539,7 +542,6 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
             get_dialogue_func = self.__get_current_werewolf_dialogue__
             next_stage = self.__stage_werewolf__
             operation_name = "werewolf_dialogue"
-            target = self.id
 
         if self.need_vote2:
             self.__setting_vote2_id_and_target_id__()
@@ -551,7 +553,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
             self.current_comment_id_idx = self.first_comment_id_idx
 
         # 目前玩家要發言
-        ret.append([[self.id[self.current_comment_id_idx]],operation_name,target,"玩家發言"])
+        ret.append([[self.id[self.current_comment_id_idx]],operation_name,[],"玩家發言"])
         # 下個stage 顯示的發言
         if self.list_players[self.id[self.current_comment_id_idx]].state == 1:
             self.list_chat_id.append([get_dialogue_func,self.id[self.current_comment_id_idx]])
