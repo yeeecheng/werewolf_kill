@@ -6,7 +6,7 @@ import grpc
 import protobufs.werewolf_kill_pb2 as p_wkp
 import protobufs.werewolf_kill_pb2_grpc as p_wkpg
 
-from envirement  import env
+from environment  import env
 
 
 class WerewolfKillService(p_wkpg.werewolf_killServicer):
