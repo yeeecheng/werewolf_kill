@@ -197,6 +197,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
                 self.check_end = True
         
         for idx , (kind , id) in  enumerate(self.list_died_id):
+            if kind == self.__killed_by_hunter__ and self.first_comment_id_idx == None:
+                idx = 1
             # 誰死了
             ret.append(kind(id=id,seq=idx))
         self.list_died_id.clear()
@@ -760,16 +762,24 @@ if __name__ == "__main__":
 
     op  , stage = env.stage()
     print(op,stage)
-    print(env.player_operation(id=5,operation="vote",target_id=1,description="",current_stage=stage))
+    print(env.player_operation(id=5,operation="vote",target_id=2,description="",current_stage=stage))
 
     op  , stage = env.stage()
     print(op,stage)
 
     op  , stage = env.stage()
     print(op,stage)
+    # print(env.player_operation(id=1,operation="vote",target_id=5,description="poison",current_stage=stage))
 
+    # op  , stage = env.stage()
+    # print(op,stage)
+    # print(env.player_operation(id=6,operation="vote_or_not",target_id=4,description="",current_stage=stage))
+    # print("!!!")
+    # op  , stage = env.stage()
+    # print(op,stage)
     op  , stage = env.stage()
     print(op,stage)
+
     for i in range(6):
         op  , stage = env.stage()
         print(op,stage)
@@ -778,22 +788,22 @@ if __name__ == "__main__":
     print(op,stage)
     print(env.player_operation(id=5,operation="vote",target_id=2,description="",current_stage=stage))
 
-    op  , stage = env.stage()
-    print(op,stage)
-
-    op  , stage = env.stage()
-    print(op,stage)
-
-    op  , stage = env.stage()
-    print(op,stage)
-
-    op  , stage = env.stage()
-    print(op,stage)
-
-    op  , stage = env.stage()
-    print(op,stage)
-
     print(env.player_operation(id=5,operation="vote",target_id=6,description="",current_stage=stage))
+    op  , stage = env.stage()
+    print(op,stage)
+    print(env.player_operation(id=6,operation="vote_or_not",target_id=4,description="",current_stage=stage))
+    op  , stage = env.stage()
+    print(op,stage)
+
+    op  , stage = env.stage()
+    print(op,stage)
+
+    op  , stage = env.stage()
+    print(op,stage)
+
+    op  , stage = env.stage()
+    print(op,stage)
+
 
     print("!!")
 
