@@ -196,9 +196,9 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
             else :
                 self.check_end = True
         
-        for kind , id in  self.list_died_id:
+        for idx , (kind , id) in  enumerate(self.list_died_id):
             # 誰死了
-            ret.append(kind(id=id))
+            ret.append(kind(id=id,seq=idx))
         self.list_died_id.clear()
 
         if len(self.list_dialogue_id) != 0:
@@ -256,7 +256,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
             return [[], "end", [], description]
         return None
     
-    def __killed_by_werewolf__(self,id:int)->list:
+    def __killed_by_werewolf__(self,id:int,seq:int)->list:
         if self.round == 1:
             self.list_dialogue_id.append([[[id],"dialogue",[],"發遺言"],[[],"other",[id],"天亮請睜眼，$請發表遺言"]])
         
@@ -266,20 +266,20 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
             self.list_dialogue_id.append([[self.id,"vote_or_not",self.target_id,"獵人殺人"],[]])
             self.current_stage_name = "hunter"
 
-        return [[id],"died",[],"昨晚死了"]
+        return [[id],"died",[seq],"昨晚死了"]
     
-    def __killed_by_witch__(self,id:int)->list:
+    def __killed_by_witch__(self,id:int,seq:int)->list:
         if self.round == 1:
             self.list_dialogue_id.append([[[id],"dialogue",[],"發遺言"],[[],"other",[id],"天亮請睜眼，$請發表遺言"]])
         
-        return [[id],"died",[],"昨晚死了"]
+        return [[id],"died",[seq],"昨晚死了"]
     
-    def __killed_by_hunter__(self,id:int)->list:
+    def __killed_by_hunter__(self,id:int,seq:int)->list:
         print("",id)
         self.list_dialogue_id.append([[[id],"dialogue",[],"發遺言"],[[],"other",[id],"$被獵人殺死了，請發表遺言"]])
-        return [[id],"died",[],"被獵人殺了"]
+        return [[id],"died",[seq],"被獵人殺了"]
 
-    def __killed_by_vote__(self,id:int)->list:
+    def __killed_by_vote__(self,id:int,seq:int)->list:
 
         self.list_dialogue_id.append([[[id],"dialogue",[],"發遺言"],[[],"other",[id],"$被票出去了，請發表遺言"]])
         if self.role_list[id] == 4:
@@ -288,7 +288,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
             self.list_dialogue_id.append([[self.id,"vote_or_not",self.target_id,"獵人殺人"],[]])
             self.current_stage_name = "hunter"
         
-        return [[id],"died",[],"被票出去了"]
+        return [[id],"died",[seq],"被票出去了"]
 
     def __get_role_id_list__(self,role:str,night_mode:bool=False)->list:
         
@@ -628,6 +628,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         return list_current_vote
     
     def check_player_voted_state(self)->list:
+        
         list_not_vote = [i for i in range(self.num_player) if i not in self.id]
         list_current_vote = [-1 for _ in range(self.num_player)]
         for i in self.id:
@@ -636,7 +637,6 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
             list_current_vote[idx] = id.current_vote_player_number
             if idx in list_not_vote:
                 list_current_vote[idx] = -2
-         
         
         return list_current_vote
 
