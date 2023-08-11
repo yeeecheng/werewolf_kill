@@ -11,9 +11,10 @@ from environment  import env
 
 class WerewolfKillService(p_wkpg.werewolf_killServicer):
 
-    def __init__(self):
+    def __init__(self,opt):
         
         self.dict_game_env = dict()
+        self.random = opt.random
 
     def checkRoleList(self,request,context):
         print("checkRoleList: No need room_name")
@@ -25,7 +26,7 @@ class WerewolfKillService(p_wkpg.werewolf_killServicer):
     def startGame(self,request,context):
         
         room_name = request.room_name
-        self.dict_game_env[room_name] = env(role_list=request.role)
+        self.dict_game_env[room_name] = env(roles=request.role,random_assigned=self.random)
         role_list = self.dict_game_env[room_name].start_game()
         
         print(self.__current_state__(room_name=room_name))
@@ -87,12 +88,19 @@ class WerewolfKillService(p_wkpg.werewolf_killServicer):
 
         return f"\nroom {room_name}{info}"
 
+def parse_opt():
 
-def serve():
+    parser =  argparse.ArgumentParser()
+    parser.add_argument("--random",type=bool,default=False)
+
+    return parser.parse_args()
+
+
+def serve(opt):
     
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     p_wkpg.add_werewolf_killServicer_to_server(
-        WerewolfKillService(), server
+        WerewolfKillService(opt), server
     )  
     
     server.add_insecure_port('[::]:50051')
@@ -102,4 +110,5 @@ def serve():
 
 if __name__ == '__main__':
     logging.basicConfig()
-    serve()
+    opt = parse_opt()
+    serve(opt)
