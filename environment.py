@@ -383,7 +383,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
 
     def __get_werewolfKill_res__(self):
         
-        list_current_vote = self.check_player_voted_state()
+        list_current_vote = self.__check_player_voted_state__()
         list_live_id = self.__get_role_id_list__(role="werewolf",night_mode=True)
         list_target_id = self.__get_target_list__(vote=True)
 
@@ -583,7 +583,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         
         if self.__get_current_voted_id__() != None:
             return True
-        list_current_vote = self.check_player_voted_state()
+        list_current_vote = self.__check_player_voted_state__()
         list_live_id = self.__get_live_id_list__()
         
         dict_vote_res = dict() 
@@ -619,11 +619,24 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         for each_id in self.list_players:
             each_id.current_vote_player_number = -1
 
-    def check_player_voted_state(self)->list:
+    def __check_player_voted_state__(self)->list:
 
         list_current_vote = [-1 for _ in range(self.num_player)]
         for idx , id in enumerate(self.list_players):
             list_current_vote[idx] = id.current_vote_player_number 
+        
+        return list_current_vote
+    
+    def check_player_voted_state(self)->list:
+        list_not_vote = [i for i in range(self.num_player) if i not in self.id]
+        list_current_vote = [-1 for _ in range(self.num_player)]
+        for i in self.id:
+            list_current_vote[i] = -1
+        for idx , id in enumerate(self.list_players):
+            list_current_vote[idx] = id.current_vote_player_number
+            if idx in list_not_vote:
+                list_current_vote[idx] = -2
+         
         
         return list_current_vote
 
