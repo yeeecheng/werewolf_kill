@@ -710,8 +710,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
     def __get_dialogue_by_round__(self,id:int,kind:str)->str:
         dialogues = ""
         try:
-            for dialogue in self.list_players[id].dialogues[kind]:
-                dialogues+=dialogue
+            dialogues = self.list_players[id].dialogues[kind][-1]
             return dialogues
         except:
             return dialogues
