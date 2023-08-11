@@ -26,7 +26,7 @@ class WerewolfKillService(p_wkpg.werewolf_killServicer):
     def startGame(self,request,context):
         
         room_name = request.room_name
-        self.dict_game_env[room_name] = env(roles=request.role,random_assigned=self.random)
+        self.dict_game_env[room_name] = env(role_list=request.role,random_assigned=self.random)
         role_list = self.dict_game_env[room_name].start_game()
         
         print(self.__current_state__(room_name=room_name))
