@@ -277,7 +277,6 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         return [[id],"died",[seq],"昨晚死了"]
     
     def __killed_by_hunter__(self,id:int,seq:int)->list:
-        print("",id)
         self.list_dialogue_id.append([[[id],"dialogue",[],"發遺言"],[[],"other",[id],"$被獵人殺死了，請發表遺言"]])
         return [[id],"died",[seq],"被獵人殺了"]
 
@@ -408,7 +407,6 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
             killed_id = candidate_id[0]
             if len(self.candidate_id) != 1:
                 killed_id = random.choice(candidate_id)
-        print("@@@@@@@@@@@@",killed_id)
         self.__kill_or_save__(target_id=killed_id,mode=-1)
         self.list_died_id.append([self.__killed_by_werewolf__,killed_id])
         self.__save_game_record__(id=killed_id,kind="werewolf")
@@ -702,13 +700,13 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
 
         if id not in self.id  :
             return False
-        if mode == "dialogue":
+        if mode in ["dialogue","vote_dialogue"]:
             if id != self.id[self.current_comment_id_idx]:
                 return False
+            idx = 1 if self.need_vote2 else 0
             if self.round not in self.list_players[id].dialogues.keys():
-                
-                self.list_players[id].dialogues[str(self.round)] = list()
-            self.list_players[id].dialogues[str(self.round)].append(content)
+                self.list_players[id].dialogues[str(self.round)] = ["",""]
+            self.list_players[id].dialogues[str(self.round)][idx] = content
         elif mode == "died":
             if self.round not in self.list_players[id].dialogues.keys():
                 self.list_players[id].dialogues["died_dialogue"] = list()
@@ -724,8 +722,11 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
 
     def __get_dialogue_by_round__(self,id:int,kind:str)->str:
         dialogues = ""
+        
         try:
-            dialogues = self.list_players[id].dialogues[kind][-1]
+
+            idx = 1 if self.need_vote2 else 0
+            dialogues = self.list_players[id].dialogues[kind][idx]
             return dialogues
         except:
             return dialogues
@@ -759,39 +760,47 @@ if __name__ == "__main__":
 
     op  , stage = env.stage()
     print(op,stage)
-
+    # 狼
     op  , stage = env.stage()
     print(op,stage)
-    print(env.player_operation(id=5,operation="vote",target_id=2,description="",current_stage=stage))
-
+    # print(env.player_operation(id=5,operation="vote",target_id=6,description="",current_stage=stage))
+    # 預
     op  , stage = env.stage()
     print(op,stage)
-
+    # 女巫
     op  , stage = env.stage()
     print(op,stage)
     # print(env.player_operation(id=1,operation="vote",target_id=5,description="poison",current_stage=stage))
-
-    # op  , stage = env.stage()
-    # print(op,stage)
-    # print(env.player_operation(id=6,operation="vote_or_not",target_id=4,description="",current_stage=stage))
-    # print("!!!")
-    # op  , stage = env.stage()
-    # print(op,stage)
+    # 結果
     op  , stage = env.stage()
     print(op,stage)
+    # print(env.player_operation(id=6,operation="vote_or_not",target_id=4,description="",current_stage=stage))
+    print("!!!")
+    # op  , stage = env.stage()
+    # print(op,stage)
+    # op  , stage = env.stage()
+    # print(op,stage)
 
     for i in range(6):
         op  , stage = env.stage()
         print(op,stage)
+        for j in range(7):
+            print(env.player_operation(id=j,operation="dialogue",target_id=1,description="test",current_stage=stage))
+
     
     op  , stage = env.stage()
     print(op,stage)
-    print(env.player_operation(id=5,operation="vote",target_id=2,description="",current_stage=stage))
-
-    print(env.player_operation(id=5,operation="vote",target_id=6,description="",current_stage=stage))
+    print("!!@@@@@")
+    for i in range(6):
+        op  , stage = env.stage()
+        print(op,stage)
+        for j in range(7):
+            print(env.player_operation(id=j,operation="dialogue",target_id=1,description="aaaaaaaaaaa",current_stage=stage))
+    # print(env.player_operation(id=5,operation="vote",target_id=2,description="",current_stage=stage))
+    # print(env.player_operation(id=5,operation="vote",target_id=6,description="",current_stage=stage))
     op  , stage = env.stage()
-    print(op,stage)
-    print(env.player_operation(id=6,operation="vote_or_not",target_id=4,description="",current_stage=stage))
+    # print(op,stage)
+    # print(env.player_operation(id=6,operation="vote_or_not",target_id=4,description="",current_stage=stage))
     op  , stage = env.stage()
     print(op,stage)
 
