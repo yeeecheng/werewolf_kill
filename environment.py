@@ -218,8 +218,9 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
                 if self.list_dialogue_id[0][0][1] in ["vote_or_not","vote"]:
                     ret.append(self.list_dialogue_id[0][0])
                     self.list_dialogue_id.pop(0)
-            except:
-                pass
+            except Exception as e:
+                print(e)
+
 
         if self.check_end :
             end_game_res = self.__check_end_game__() 
@@ -512,7 +513,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
             if self.__witch_has_save__():
                 ret.append([self.id,"vote_or_not",[self.__get_current_killed_id__()],"女巫救人"])
             if self.__witch_has_kill__():
-                self.target_id.pop(self.id[0])
+    
+                self.target_id.remove(self.id[0])
                 ret.append([self.id,"vote_or_not",self.target_id,"女巫毒人"])
             
         else :
@@ -748,7 +750,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
 
 if __name__ == "__main__":
     
-    env = env(role_list=[1,1,2,2,1],random_assigned=False)
+    env = env(role_list=[1,1,2,2],random_assigned=False)
 
     print(env.start_game())
     # env.__night__()
@@ -763,7 +765,7 @@ if __name__ == "__main__":
     # 狼
     op  , stage = env.stage()
     print(op,stage)
-    # print(env.player_operation(id=5,operation="vote",target_id=6,description="",current_stage=stage))
+    print(env.player_operation(id=5,operation="vote",target_id=0,description="",current_stage=stage))
     # 預
     op  , stage = env.stage()
     print(op,stage)
@@ -781,7 +783,7 @@ if __name__ == "__main__":
     # op  , stage = env.stage()
     # print(op,stage)
 
-    for i in range(6):
+    for i in range(5):
         op  , stage = env.stage()
         print(op,stage)
         for j in range(7):
@@ -791,7 +793,7 @@ if __name__ == "__main__":
     op  , stage = env.stage()
     print(op,stage)
     print("!!@@@@@")
-    for i in range(6):
+    for i in range(5):
         op  , stage = env.stage()
         print(op,stage)
         for j in range(7):
@@ -815,6 +817,9 @@ if __name__ == "__main__":
 
 
     print("!!")
+
+    op  , stage = env.stage()
+    print(op,stage)
 
     op  , stage = env.stage()
     print(op,stage)
