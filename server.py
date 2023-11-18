@@ -16,6 +16,7 @@ class WerewolfKillService(p_wkpg.werewolf_killServicer):
         self.dict_game_env = dict()
         self.random = opt.random
 
+
     def checkRoleList(self,request,context):
         print("checkRoleList: No need room_name")
         print(f"passing value: role: {request.role}, room_name: {request.room_name}\n///")

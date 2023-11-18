@@ -10,9 +10,10 @@ class env():
     def __init__(self,role_list:list , random_assigned:bool=False):
 
         # game's initial setting
-        
+        random_assigned = False
         # role setting
         self.role_list = [ idx for idx ,value in enumerate(role_list) for _ in range(value)]
+        # self.role_list = [3, 2, 0, 3, 1, 2, 4]
         self.num_player = len(self.role_list)
         self.random_assigned = random_assigned
         self.list_players = [0 for _ in range(self.num_player)]
@@ -235,7 +236,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         return ret
 
     def __get_end_game_res__(self)->str:
-        
+        print("!!!")
         if self.num_werewolf == (self.num_god + self.num_village) :
             return "遊戲結束 狼人過半 壞人獲勝"
         elif self.num_god <= 0 :
@@ -338,7 +339,6 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         return ret
     
     def __stage_seer_reply__(self,stage:list):
-        
         
         # 可能沒有驗，要隨機
         see_id = stage[2][0]()
@@ -550,6 +550,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         
         if self.first_comment_id_idx == None:
             self.first_comment_id_idx = random.randint(a=0,b=(len(self.id)-1))
+            # self.first_comment_id_idx = self.__get_live_id_list__()[0]
             self.current_comment_id_idx = self.first_comment_id_idx
         else :
             self.current_comment_id_idx = (self.current_comment_id_idx + 1) % len(self.id)
@@ -742,311 +743,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
     def __get_current_werewolf_dialogue__(self,id:int):
         return self.__get_dialogue_by_round__(id=id,kind="werewolf"+str(self.round))
     
-    
-
-
-
 
 
 if __name__ == "__main__":
     
     env = env(role_list=[1,1,2,2],random_assigned=False)
-
-    print(env.start_game())
-    # env.__night__()
-    op  , stage = env.stage()
-    print(op,stage)
-
-    op  , stage = env.stage()
-    print(op,stage)
-
-    op  , stage = env.stage()
-    print(op,stage)
-    # 狼
-    op  , stage = env.stage()
-    print(op,stage)
-    print(env.player_operation(id=5,operation="vote",target_id=0,description="",current_stage=stage))
-    # 預
-    op  , stage = env.stage()
-    print(op,stage)
-    # 女巫
-    op  , stage = env.stage()
-    print(op,stage)
-    # print(env.player_operation(id=1,operation="vote",target_id=5,description="poison",current_stage=stage))
-    # 結果
-    op  , stage = env.stage()
-    print(op,stage)
-    # print(env.player_operation(id=6,operation="vote_or_not",target_id=4,description="",current_stage=stage))
-    print("!!!")
-    # op  , stage = env.stage()
-    # print(op,stage)
-    # op  , stage = env.stage()
-    # print(op,stage)
-
-    for i in range(5):
-        op  , stage = env.stage()
-        print(op,stage)
-        for j in range(7):
-            print(env.player_operation(id=j,operation="dialogue",target_id=1,description="test",current_stage=stage))
-
-    
-    op  , stage = env.stage()
-    print(op,stage)
-    print("!!@@@@@")
-    for i in range(5):
-        op  , stage = env.stage()
-        print(op,stage)
-        for j in range(7):
-            print(env.player_operation(id=j,operation="dialogue",target_id=1,description="aaaaaaaaaaa",current_stage=stage))
-    # print(env.player_operation(id=5,operation="vote",target_id=2,description="",current_stage=stage))
-    # print(env.player_operation(id=5,operation="vote",target_id=6,description="",current_stage=stage))
-    op  , stage = env.stage()
-    # print(op,stage)
-    # print(env.player_operation(id=6,operation="vote_or_not",target_id=4,description="",current_stage=stage))
-    op  , stage = env.stage()
-    print(op,stage)
-
-    op  , stage = env.stage()
-    print(op,stage)
-
-    op  , stage = env.stage()
-    print(op,stage)
-
-    op  , stage = env.stage()
-    print(op,stage)
-
-
-    print("!!")
-
-    op  , stage = env.stage()
-    print(op,stage)
-
-    op  , stage = env.stage()
-    print(op,stage)
-
-    op  , stage = env.stage()
-    print(op,stage)
-
-    op  , stage = env.stage()
-    print(op,stage)
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     print(env.player_operation(id=op[0][0][0],operation="dialogue",target_id=-1,description="hello",current_stage=stage))
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     print(env.player_operation(id=op[1][0][0],operation="dialogue",target_id=-1,description="hihi",current_stage=stage))
-    
-#     # 狼殺人
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     print(env.player_operation(id=4,operation="vote",target_id=2,description="",current_stage=stage))
-#     print(env.player_operation(id=4,operation="vote",target_id=7,description="",current_stage=stage))
-#     print(env.player_operation(id=5,operation="vote",target_id=1,description="",current_stage=stage))
-#     print(env.player_operation(id=5,operation="vote",target_id=-1,description="",current_stage=stage))
-#     print(env.player_operation(id=5,operation="vote",target_id=1,description="",current_stage=stage))
-#     print(env.check_player_voted_state())
-
-#     # 預言家
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     print(env.player_operation(id=0,operation="vote",target_id=4,description="",current_stage=stage))
-#     print(env.player_operation(id=0,operation="vote",target_id=2,description="",current_stage=stage))
-
-#     # 女巫
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     #print(env.player_operation(id=1,operation="vote_or_not",target_id=4,description="save",current_stage=stage))
-#     # print(env.player_operation(id=1,operation="vote",target_id=-1,description="",current_stage=stage))
-#     # print(env.player_operation(id=1,operation="vote_or_not",target_id=2,description="poison",current_stage=stage))
-
-#     # check
-#     # op  , stage = env.stage()
-#     # print(op,stage)
-#     # print(env.player_operation(id=6,operation="vote_or_not",target_id=4,description="",current_stage=stage))
-#     # print(env.player_operation(id=4,operation="dialogue",target_id=-1,description="abc",current_stage=stage))
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     print("/////")
-#     print(env.player_operation(id=4,operation="dialogue",target_id=-1,description="qqqqqq",current_stage=stage))
-
-#     # op  , stage = env.stage()
-#     # print(op,stage)
-#     # print(env.player_operation(id=4,operation="dialogue",target_id=-1,description="1234",current_stage=stage))
-#     # 0 , 1 , 3 , 5 
-#     # env.__day__()
-#     print("!!!!!")
-#     for _ in range(4):
-#         op  , stage = env.stage()
-#         print(op,stage)
-#         print(env.player_operation(id=op[-1][0][0],operation="dialogue",target_id=-1,description="test",current_stage=stage))
-
-
-#     # 投票
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     #print(env.player_operation(id=5,operation="vote_or_not",target_id=6,description="",current_stage=stage))
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     print("/////")
-#     #print(env.player_operation(id=6,operation="vote_or_not",target_id=4,description="",current_stage=stage))
-#    # print(env.player_operation(id=6,operation="dialogue",target_id=-1,description="abc",current_stage=stage))
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     #print(env.player_operation(id=4,operation="dialogue",target_id=-1,description="1111",current_stage=stage))
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     print(env.player_operation(id=5,operation="vote",target_id=2,description="",current_stage=stage))
-#     print("!!")
-
-#     # for _ in range(4):
-#     #     op  , stage = env.stage()
-#     #     print(op,stage)
-
-#     # op  , stage = env.stage()
-#     # print(op,stage)
-#     # print(env.player_operation(id=1,operation="vote_or_not",target_id=5,description="",current_stage=stage))
-#     # print(env.player_operation(id=3,operation="vote_or_not",target_id=5,description="",current_stage=stage))
-#     # print(env.player_operation(id=5,operation="vote_or_not",target_id=3,description="",current_stage=stage))
-#     # print(env.player_operation(id=2,operation="vote_or_not",target_id=3,description="",current_stage=stage))
-#     # print("///////////")
-#     # print(env.check_player_voted_state())
-#     # op  , stage = env.stage()
-#     # print(op,stage)
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     #print(env.player_operation(id=2,operation="vote_or_not",target_id=3,description="",current_stage=stage))
-#     # 狼投
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     print(env.player_operation(id=5,operation="vote",target_id=5,description="",current_stage=stage))
-#     print("@@")
-#     #print(env.player_operation(id=3,operation="dialogue",target_id=-1,description="ffffffff",current_stage=stage))
-#     # 預言
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     # 女巫
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     # 結果
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     # 投票
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     # # print(env.player_operation(id=6,operation="vote_or_not",target_id=4,description="",current_stage=stage))
-#     # for _ in range(4):
-#     #     op  , stage = env.stage()
-#     #     print(op,stage)
-#     #     print(env.player_operation(id=op[-1][0][0],operation="dialogue",target_id=-1,description="gggggggggggg",current_stage=stage))
-    
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     # print(env.player_operation(id=5,operation="vote_or_not",target_id=1,description="",current_stage=stage))
-#     print("/////////!!///////////")
-#     op  , stage = env.stage()
-#     print(op,stage)
-
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     op  , stage = env.stage()
-#     print(op,stage)
-    
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     op  , stage = env.stage()
-#     print(op,stage)
-#     # print(env.player_operation(id=op[-1][0][0],operation="dialogue",target_id=-1,description="eeeeeeeee",current_stage=stage))
-
-#     # op  , stage = env.stage()
-#     # print(op,stage)
-#     # print(env.player_operation(id=op[-1][0][0],operation="dialogue",target_id=-1,description="gggggggggggg",current_stage=stage))
-
-#     # op  , stage = env.stage()
-#     # print(op,stage)
-#     # print(env.player_operation(id=op[-1][0][0],operation="dialogue",target_id=-1,description="gggggggggggg",current_stage=stage))
-
-#     # # env.__night__()
-#     # for _ in range(2):
-#     #     op  , stage = env.stage()
-#     #     print(op,stage)
-
-#     # print("!!")
-
-#     # op  , stage = env.stage()
-#     # print(op,stage)
-
-#     # op  , stage = env.stage()
-#     # print(op,stage)
-
-#     # op  , stage = env.stage()
-#     # print(op,stage)
-
-#     # op  , stage = env.stage()
-#     # print(op,stage)

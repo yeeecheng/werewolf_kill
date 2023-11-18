@@ -1,8 +1,3 @@
-__pycache__/*
+__pycache__
 tempCodeRunnerFile.py
-server.ipynb
-client.ipynb
-restruct.py
-old_version.py
-test_case.ipynb
-test.txt
+client.py
