@@ -13,6 +13,8 @@ class env():
         random_assigned = False
         # role setting
         self.role_list = [ idx for idx ,value in enumerate(role_list) for _ in range(value)]
+        #!! 打開註解，設定成你要固定角色，目前預設的是產生gameinfo的順序
+        # 0: 預言家, 1: 女巫, 2: 平民, 3:狼人, 4: 獵人
         # self.role_list = [3, 2, 0, 3, 1, 2, 4]
         self.num_player = len(self.role_list)
         self.random_assigned = random_assigned
@@ -550,6 +552,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         
         if self.first_comment_id_idx == None:
             self.first_comment_id_idx = random.randint(a=0,b=(len(self.id)-1))
+            #!! 打開註解，設定成你要固定角色，目前預設的是產生gameinfo的順序
             # self.first_comment_id_idx = self.__get_live_id_list__()[0]
             self.current_comment_id_idx = self.first_comment_id_idx
         else :
