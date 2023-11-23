@@ -9,8 +9,6 @@ class env():
     # id : user_id , 
     def __init__(self,role_list:list , random_assigned:bool=False):
 
-        # game's initial setting
-        random_assigned = False
         # role setting
         # self.role_list = [ idx for idx ,value in enumerate(role_list) for _ in range(value)]
         #!! 打開註解，設定成你要固定角色，目前預設的是產生gameinfo的順序
