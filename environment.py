@@ -280,6 +280,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
     
     def __killed_by_hunter__(self,id:int,seq:int)->list:
         self.list_dialogue_id.append([[[id],"dialogue",[],"發遺言"],[[],"other",[id],"$被獵人殺死了，請發表遺言"]])
+        self.check_end = True
         return [[id],"died",[seq],"被獵人殺了"]
 
     def __killed_by_vote__(self,id:int,seq:int)->list:
