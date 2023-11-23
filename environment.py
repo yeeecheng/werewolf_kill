@@ -10,10 +10,10 @@ class env():
     def __init__(self,role_list:list , random_assigned:bool=False):
 
         # role setting
-        # self.role_list = [ idx for idx ,value in enumerate(role_list) for _ in range(value)]
+        self.role_list = [ idx for idx ,value in enumerate(role_list) for _ in range(value)]
         #!! 打開註解，設定成你要固定角色，目前預設的是產生gameinfo的順序
         # 0: 預言家, 1: 女巫, 2: 平民, 3:狼人, 4: 獵人
-        self.role_list = [3, 2, 0, 3, 1, 2, 4]
+        # self.role_list = [3, 2, 0, 3, 1, 2, 4]
         self.num_player = len(self.role_list)
         self.random_assigned = random_assigned
         self.list_players = [0 for _ in range(self.num_player)]
