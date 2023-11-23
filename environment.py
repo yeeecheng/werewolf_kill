@@ -12,10 +12,10 @@ class env():
         # game's initial setting
         random_assigned = False
         # role setting
-        self.role_list = [ idx for idx ,value in enumerate(role_list) for _ in range(value)]
+        # self.role_list = [ idx for idx ,value in enumerate(role_list) for _ in range(value)]
         #!! 打開註解，設定成你要固定角色，目前預設的是產生gameinfo的順序
         # 0: 預言家, 1: 女巫, 2: 平民, 3:狼人, 4: 獵人
-        # self.role_list = [3, 2, 0, 3, 1, 2, 4]
+        self.role_list = [3, 2, 0, 3, 1, 2, 4]
         self.num_player = len(self.role_list)
         self.random_assigned = random_assigned
         self.list_players = [0 for _ in range(self.num_player)]
@@ -439,6 +439,9 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
             self.list_players[id].kill_times += 1
         if target_id == -1 :
             return True
+        killed_id = self.__get_current_killed_id__()
+        if killed_id == target_id:
+            return True
         self.__kill_or_save__(target_id=target_id,mode=-1)
         self.list_died_id.append([self.__killed_by_witch__,target_id])
         self.__save_game_record__(id=target_id,kind="poisoned")
@@ -552,7 +555,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         
         if self.first_comment_id_idx == None:
             self.first_comment_id_idx = random.randint(a=0,b=(len(self.id)-1))
-            #!! 打開註解，設定成你要固定角色，目前預設的是產生gameinfo的順序
+            #!! 打開註解，設定成你要的發言順序，目前預設的是從第一個號碼最小的活著玩家
             # self.first_comment_id_idx = self.__get_live_id_list__()[0]
             self.current_comment_id_idx = self.first_comment_id_idx
         else :
