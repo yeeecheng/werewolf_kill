@@ -613,6 +613,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         else:
             # get maximum voted id
             self.candidate_id = [key for key , val  in dict_vote_res.items() if len(val) == max([len(val) for val in dict_vote_res.values()])]
+            print(self.candidate_id)
+            print(self.__check_player_voted_state__())
             if self.need_vote2 and len(self.candidate_id) != 1:
                 self.candidate_id = random.sample(self.candidate_id,1)
 
