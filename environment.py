@@ -555,7 +555,7 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         if self.first_comment_id_idx == None:
             self.first_comment_id_idx = random.randint(a=0,b=(len(self.id)-1))
             #!! 打開註解，設定成你要的發言順序，目前預設的是從第一個號碼最小的活著玩家
-            # self.first_comment_id_idx = self.__get_live_id_list__()[0]
+            # self.first_comment_id_idx = 0
             self.current_comment_id_idx = self.first_comment_id_idx
         else :
             self.current_comment_id_idx = (self.current_comment_id_idx + 1) % len(self.id)
