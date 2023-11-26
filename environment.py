@@ -185,7 +185,14 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         # reset list
         self.list_chat_id.clear()
         # 接下來要進入 狼發言 , 
-        if self.next_stage == self.__night__  and self.first_comment_id_idx != None and self.current_comment_id_idx == ((self.first_comment_id_idx-1)+len(self.id)) % len(self.id) and self.state == 1:
+        try:
+            if self.need_vote2:
+                check =  self.current_comment_id_idx == ((self.first_comment_id_idx-1) + len(self.target_id)) % len(self.target_id)
+            else:
+                check = self.current_comment_id_idx == ((self.first_comment_id_idx-1) + len(self.id)) % len(self.id)
+        except:
+            pass
+        if self.next_stage == self.__night__  and self.first_comment_id_idx != None and check and self.state == 1:
             if not self.__get_vote_res__():
                 # vote1 
                 if not self.need_vote2: 
@@ -550,8 +557,8 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         if self.need_vote2:
             self.__setting_vote2_id_and_target_id__()
             # target id才要發言
-            self.id =self.target_id
-        
+            self.id = self.target_id
+        self.id = sorted(self.id)
         if self.first_comment_id_idx == None:
             self.first_comment_id_idx = random.randint(a=0,b=(len(self.id)-1))
             #!! 打開註解，設定成你要的發言順序，目前預設的是從第一個號碼最小的活著玩家
@@ -593,7 +600,6 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
             return True
         list_current_vote = self.__check_player_voted_state__()
         list_live_id = self.__get_live_id_list__()
-        
         dict_vote_res = dict() 
         for id in list_live_id:
             if list_current_vote[id] == -1:
@@ -613,8 +619,6 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         else:
             # get maximum voted id
             self.candidate_id = [key for key , val  in dict_vote_res.items() if len(val) == max([len(val) for val in dict_vote_res.values()])]
-            print(self.candidate_id)
-            print(self.__check_player_voted_state__())
             if self.need_vote2 and len(self.candidate_id) != 1:
                 self.candidate_id = random.sample(self.candidate_id,1)
 
