@@ -439,12 +439,12 @@ all player's state: {[f"player {idx}: {state}" for idx , state in enumerate(self
         if target_id == -1 :
             return True
         killed_id = self.__get_current_killed_id__()
+        self.__save_game_record__(id=target_id,kind="poisoned")
+        self.list_players[id].kill_times -= 1
         if killed_id == target_id:
             return True
         self.__kill_or_save__(target_id=target_id,mode=-1)
         self.list_died_id.append([self.__killed_by_witch__,target_id])
-        self.__save_game_record__(id=target_id,kind="poisoned")
-        self.list_players[id].kill_times -= 1
         return True
     
     def __witch_save__(self,id:int,target_id:int)->bool:
